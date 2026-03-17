@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  node1:
+    build: ./node
+    ports:
+      - "5001:5000"
+    environment:
+      - NODE_NAME=node1
+      - PEER=http://node2:5000
+
+  node2:
+    build: ./node
+    ports:
+      - "5002:5000"
+    environment:
+      - NODE_NAME=node2
+      - PEER=http://node1:5000
