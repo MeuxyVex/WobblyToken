@@ -10,6 +10,7 @@ Miniblockchain avec 2node qui communique qui mine et qui udpate une blockchain
   - /sync : synchroniser avec l’autre node
   
 #utilisation
+
 git clone https://github.com/MeuxyVex/WooblyToken
 aller dans le dossier WooblyToken/blockchain-simulation
 lancer avec docker-compose up --build
