@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify #flask permet de crée un serveur au n
 import requests #permet d'envoyer des requetes http
 import os #utilisé pour lire les fichiers config docker
 import time #juste pour faire une pause à la fin du script
-
+import hashlib #permet de faire du hashage pour le minage des blocks
+import json #permet de convertir les blocks en json pour le hashage et l'envoie entre les nodes
 app = Flask(__name__) #initialise le serveur web
 
 NODE_NAME = os.getenv("NODE_NAME") #recup dans le fichier .yml  le nom du node 
@@ -21,11 +22,16 @@ def create_block(data): #création du block
     block = { #dictionnaire des data du block
         "index": index,
         "data": data,
-        "previous_hash": prev_hash
+        "previous_hash": prev_hash,
+        "nonce": 0,
+        "hash": "123456789abcdef" #valeur de hash temporaire pour le minage du block
     }
 
-    block["hash"] = str(hash(str(block))) #création du hash du block str -> transfo du dictionnaire en texte
-    return block                          #hash -> transforme du texte en chiffre
+    while block["hash"][0:4] != "0000":
+        blockjson = (json.dumps(block, sort_keys=True)) #convertit le block en json pour le hashage
+        block["hash"] = (hashlib.sha256((blockjson).encode()).hexdigest()) #tant que les 4 premier caractères du hash ne sont pas 0000 on incrémente le nonce et on recalcule le hash 
+        block["nonce"] += 1 #incrémetation du nonce pour faire varier le hash et trouver un hash qui commence par 0000
+    return block                          
 
 @app.route("/mine") #mine un block quand le serv flask va sur /mine
 def mine():
@@ -45,16 +51,16 @@ def receive_block():
 
     if len(blockchain) == 0:
         blockchain.append(block)
-        return {"status": "accepted"} #si la blockchain est vide on accepte automatiquement le premier block
+        return {"status": "Accepté"} #si la blockchain est vide on accepte automatiquement le premier block
 
     dernier_bloc = blockchain[-1] #sinon on récupère le dernier block
 
     
     if block["previous_hash"] == dernier_bloc["hash"]:
         blockchain.append(block) #verifie si le hash précédent correspond au hash du block précédent pour s'assurer que le block précédent est connecté à la chaine
-        return {"status": "accepted"}
+        return {"status": "Accepté"}
     else: #sinon on le refuse
-        return {"status": "rejected"}
+        return {"status": "Refusé"}
 
 @app.route("/chain") #quand on va à l'adresse /chain affiche toute la blockchain 
 def get_chain():
