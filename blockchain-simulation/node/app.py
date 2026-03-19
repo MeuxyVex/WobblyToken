@@ -21,25 +21,28 @@ def create_block(data): #création du block
 
     block = { #dictionnaire des data du block
         "index": index,
-        "data": data,
+        "data": data, #data va reprendre le nom du node pour différencier les blocks minés par les différents nodes
         "previous_hash": prev_hash,
         "nonce": 0,
-        "hash": "123456789abcdef" #valeur de hash temporaire pour le minage du block
+        "hash": "123456789abcdef", #valeur de hash temporaire pour le minage du block
+        "time": 0
     }
-
-    while block["hash"][0:4] != "0000":
+    starttime = time.perf_counter()
+    while block["hash"][0:5] != "00000":
         blockjson = (json.dumps(block, sort_keys=True)) #convertit le block en json pour le hashage
         block["hash"] = (hashlib.sha256((blockjson).encode()).hexdigest()) #tant que les 4 premier caractères du hash ne sont pas 0000 on incrémente le nonce et on recalcule le hash 
         block["nonce"] += 1 #incrémetation du nonce pour faire varier le hash et trouver un hash qui commence par 0000
+    endtime = time.perf_counter()
+    block["time"] = endtime - starttime #calcul du temps de minage du block
     return block                          
 
-@app.route("/mine") #mine un block quand le serv flask va sur /mine
+@app.route("/mine") #mine un block quand on va sur /mine
 def mine():
-    block = create_block(f"Block de {NODE_NAME}") #création du block avec le nom du node
+    block = create_block(f"Block de {NODE_NAME}") #création du block avec le nom du node + appel de la fonction create_block pour le minage du block
     blockchain.append(block)
 
     try:
-        requests.post(f"{PEER}/receive_block", json=block) #envoie une requete http à l'autre node à l'adresse /receiveblock  
+        requests.post(f"{PEER}/receive_block", json=block) #envoie le block son format json http à l'autre node à l'adresse de la peer sur /receiveblock  
     except:
         pass
 
@@ -57,22 +60,22 @@ def receive_block():
 
     
     if block["previous_hash"] == dernier_bloc["hash"]:
-        blockchain.append(block) #verifie si le hash précédent correspond au hash du block précédent pour s'assurer que le block précédent est connecté à la chaine
+        blockchain.append(block) #est-ce que le hash précédent annoncé par le nouveau block correspond bien au hash de MON dernier block ?
         return {"status": "Accepté"}
     else: #sinon on le refuse
-        return {"status": "Refusé"}
+        return {"status": "Refusé"} #retour en dictionnaire pour que ce soit plus lisible et retour parceque sa aide a debug
 
 @app.route("/chain") #quand on va à l'adresse /chain affiche toute la blockchain 
 def get_chain():
-    return jsonify(blockchain)
-
+    return jsonify(blockchain) #convertit la liste blockchain en json
+    
 @app.route("/sync") #récupère la block chain de l'autre node 
 def sync():
     try:
         peer_chain = requests.get(f"{PEER}/chain").json() #demande toute la blockchain à l'autre node
-        global blockchain #blockchain est en dehors des fonctions et donc  si global n'est pas utilisé la valeur serait celle tout en haut donc [], rien
+        global blockchain #la liste blockchain est en dehors des fonctions et donc  si global n'est pas utilisé la valeur serait celle tout en haut donc [], rien
         if len(peer_chain) > len(blockchain):
-            blockchain = peer_chain #si elles ne sont pas égal on prend la blockchain la plus longue 
+            blockchain = peer_chain #si la blockchain de l'autre node est plus longue que la notre on la remplace par la sienne pour être à jour
     except:
         pass
 
