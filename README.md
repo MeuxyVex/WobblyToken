@@ -1,25 +1,27 @@
 # WobblyToken
 
-#Etat actuel:
+## État actuel
 
-Miniblockchain avec 2node qui communique qui mine et qui udpate une blockchain
+Mini-blockchain avec 2 nœuds qui communiquent, minent et mettent à jour une blockchain.
 
-#Fonction
+## Fonctionnalités
 
-  - /mine : créer un nouveau bloc
-  - /receive_block : recevoir un bloc depuis l'autre node
-  - /chain : afficher la blockchain
-  - /sync : synchroniser avec l’autre node
-  
-#utilisation
+- `/mine` : crée un nouveau bloc
+- `/receive_block` : reçoit un bloc depuis l’autre nœud
+- `/chain` : affiche la blockchain
+- `/sync` : synchronise la blockchain avec l’autre nœud
 
-git clone https://github.com/MeuxyVex/WooblyToken
-aller dans le dossier WooblyToken/blockchain-simulation
-lancer avec docker compose up --build
+## Urls
 
-#Url
+http://localhost:5001/....
+http://localhost:5002/....
 
-http://localhost:5001/????
-http://localhost:5002/????
+Remplace les .... avec une des routes si dessus
 
-remplacer ???? avec les fonctions au dessus.
+## Utilisation
+
+```bash
+git clone https://github.com/MeuxyVex/WobblyToken
+cd WobblyToken/blockchain-simulation
+docker compose up --build
+
