@@ -4,10 +4,14 @@
   <img alt="Python cryptocurrency project">
 </picture>
 
-![Repo size](https://img.shields.io/github/repo-size/MeuxyVex/WobblyToken?style=for-the-badge)
+![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-Web%20API-black?style=for-the-badge&logo=flask&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Blockchain](https://img.shields.io/badge/Blockchain-Simulation-purple?style=for-the-badge)
+![Proof of Work](https://img.shields.io/badge/Proof%20of%20Work-Mining-orange?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-In%20Development-yellow?style=for-the-badge)
 ![Last commit](https://img.shields.io/github/last-commit/MeuxyVex/WobblyToken?style=for-the-badge)
-![Issues](https://img.shields.io/github/issues/MeuxyVex/WobblyToken?style=for-the-badge)
-![Stars](https://img.shields.io/github/stars/MeuxyVex/WobblyToken?style=for-the-badge)
+
 
 
 ## État actuel
