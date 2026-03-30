@@ -1,19 +1,25 @@
-# WobblyToken
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="src/logo1.png">
-  <img alt="Python cryptocurrency project">
-</picture>
+# 🪙 WobblyToken
 
-![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python&logoColor=white)
-![Flask](https://img.shields.io/badge/Flask-Web%20API-black?style=for-the-badge&logo=flask&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+<p align="center">
+  <img src="src/logo1.png" width="150" alt="WobblyToken logo">
+</p>
 
-![Blockchain](https://img.shields.io/badge/Blockchain-Simulation-purple?style=for-the-badge)
-![Proof of Work](https://img.shields.io/badge/Proof%20of%20Work-Mining-orange?style=for-the-badge)
+<p align="center">
+  A lightweight blockchain simulation with Proof-of-Work, multi-node communication and transaction system.
+</p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python&logoColor=white">
+  <img src="https://img.shields.io/badge/Flask-Web%20API-black?style=for-the-badge&logo=flask&logoColor=white">
+  <img src="https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white">
+</p>
 
-![Status](https://img.shields.io/badge/Status-In%20Development-yellow?style=for-the-badge)
-![Last commit](https://img.shields.io/github/last-commit/MeuxyVex/WobblyToken?style=for-the-badge)
+<p align="center">
+  <img src="https://img.shields.io/badge/Blockchain-Simulation-purple?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Proof%20of%20Work-Mining-orange?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Status-In%20Development-yellow?style=for-the-badge">
+  <img src="https://img.shields.io/github/last-commit/MeuxyVex/WobblyToken?style=for-the-badge">
+</p>
 
 
 
