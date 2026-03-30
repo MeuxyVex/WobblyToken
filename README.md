@@ -10,6 +10,7 @@ Mini-blockchain avec 2 nœuds qui communiquent, minent et mettent à jour une bl
 - `/receive_block` : reçoit un bloc depuis l’autre nœud
 - `/chain` : affiche la blockchain
 - `/sync` : synchronise la blockchain avec l’autre nœud
+- `/transaction` : Affiche le mempool avec méthode GET et envoie des transactions avec POST 
 
 ## Urls
 
