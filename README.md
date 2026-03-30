@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  A lightweight blockchain simulation with Proof-of-Work, multi-node communication and transaction system.
+  Une simulation blockchain avec Proof of work, communication multi-nœuds et système de transactions.
 </p>
 
 <p align="center">
