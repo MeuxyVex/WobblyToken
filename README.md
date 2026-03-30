@@ -1,7 +1,7 @@
 # WobblyToken
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="resources/logos/claude-howto-logo-dark.svg">
-  <img alt="Claude How To" src="resources/logos/claude-howto-logo.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="src/logo.jpg">
+  <img alt="Python cryptocurrency project" src="resources/logos/claude-howto-logo.svg">
 </picture>
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
