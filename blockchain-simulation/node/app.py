@@ -1,8 +1,11 @@
+# =========================
+# Definition de variables et import 
+# =========================
 
-from flask import Flask, request, jsonify #flask permet de crée un serveur au node.
+from flask import Flask, request, jsonify, render_template #flask permet de crée un serveur au node.
 import requests #permet d'envoyer des requetes http
 import os #utilisé pour lire les fichiers config docker
-import time #juste pour faire une pause à la fin du script
+import time #juste pour faire une pause à la fin du script et pour calculer le temps de minage des blocks
 import hashlib #permet de faire du hashage pour le minage des blocks
 import json #permet de convertir les blocks en json pour le hashage et l'envoie entre les nodes
 from wallet import validate_transaction, mempool
@@ -19,9 +22,20 @@ min_difficulty = 1 #difficulté minimale pour éviter d'avoir une difficulté de
 BaseReward = 50 # récompense de base, la plus haute
 Interval = 10 # Interval de 10 blocks
 
+# =========================
+# Definition de fonctions
+# =========================
+
+def hash_calcul(block):
+    copie_block = block.copy() #copie du block pour ne pas modifier le block original
+    copie_block.pop("hash", None) #on enlève la clé "hash" du block sinon on a un cercle vicieux pour calculer le hash du block
+    copie_block.pop("time", None) #on enlève la clé "time" du block pour que le temps de minage ne soit pas pris en compte dans le hash du block on veut que il n'y ait que le nounce qui varie
+    block_json = json.dumps(copie_block, sort_keys=True) #convertit le block en json pour le hashage en ordre alphabétique des clés pour que le hash soit toujours le même pour le même block
+    return hashlib.sha256(block_json.encode()).hexdigest() #calcul du hash du block en utilisant la fonction sha256 de la bibliothèque hashlib et en encodant le json du block en octets -> hashlib celon la doc qu'avec des octets
+
 def get_difficulty():
         if len(blockchain) == 0:
-            return 5 #si c'est le premier block on met une difficulté de 5
+            return 4 #si c'est le premier block on met une difficulté de 4
         
         last_difficulty = blockchain[-1]["difficulty"] #récupère la difficulté du dernier block ou 5 si c'est le premier block
         
@@ -67,17 +81,33 @@ def create_block(data): #création du block
         "reward": get_block_reward(index)
     }
 
-    starttime = time.perf_counter()
+    starttime = time.perf_counter() #démarrage compteur
 
-    while block["hash"][0:block["difficulty"]] != "0" * block["difficulty"]: #avec la variable difficulty on peut faire varier la difficulté du minage du block en changeant le nombre de 0 que doit commencer le hash pour que le block soit valide
-        blockjson = (json.dumps(block, sort_keys=True)) #convertit le block en json pour le hashage
-        block["hash"] = (hashlib.sha256((blockjson).encode()).hexdigest()) #tant que les 4 premier caractères du hash ne sont pas 0000 on incrémente le nonce et on recalcule le hash 
-        block["nonce"] += 1 #incrémetation du nonce pour faire varier le hash et trouver un hash qui commence par 0000
-    endtime = time.perf_counter()
-    block["time"] = endtime - starttime #calcul du temps de minage du block
+    while True:
+        hash1 = hash_calcul(block) #calcul du hash du block avec la fonction hash_calcul
+        if hash1.startswith("0" * block["difficulty"]): #vérifie si le hash du block commence par le nombre de 0 requis par la difficulté du block pour être valide
+            block["hash"] = hash1 #si le hash est valide on l'ajoute au block
+            break #on sort de la boucle while pour arrêter le minage du block
+        block["nonce"] += 1 #sinon on incrémente le nonce pour changer le hash du block et essayer à nouveau de trouver un hash valide
     
+
+    endtime = time.perf_counter() #fin compteur
+    block["time"] = endtime - starttime #calcul du temps de minage du block
     return block                  
 
+
+
+# =========================
+# Partie Flask
+# =========================
+
+#Méthode GET : Lire, récupérér des données, etc...
+#Méthode POST : Créer une qql chose, envoyer des données, modifier une variable, etc...
+
+
+@app.route("/") #quand on va à l'adresse racine du serveur web du node affiche la page index.html
+def home():
+    return render_template("index.html", node_name = NODE_NAME, peer = PEER) #affiche la page index.html qui est dans le dossier templates du node
 @app.route("/mine") #mine un block quand on va sur /mine
 def mine():
     block = create_block(f"Block de {NODE_NAME}") #création du block avec le nom du node + appel de la fonction create_block pour le minage du block
@@ -112,7 +142,7 @@ def get_chain():
     return jsonify(blockchain) #convertit la liste blockchain en json
     
 @app.route("/sync") #récupère la block chain de l'autre node 
-def sync():
+def sync():     
     try:
         peer_chain = requests.get(f"{PEER}/chain").json() #demande toute la blockchain à l'autre node
         global blockchain #la liste blockchain est en dehors des fonctions et donc  si global n'est pas utilisé la valeur serait celle tout en haut donc [], rien
@@ -137,7 +167,7 @@ def add_transaction():
         return {"status": "Erreur", "message": "Aucune transaction reçue"}, 400 #si aucune transaction n'est reçue on retourne une erreur 400 "Bad Request"
     
     if not validate_transaction(tx):
-        return {"status": "Erreur", "message": "Transaction invalide"}, 400 #si la transaction reçue n'est pas valide on retourne une erreur 400 "Bad Request"
+        return {"status": "Erreur", "message": "Transaction invalide, vérifiez que les champs soient corrects"}, 400 #si la transaction reçue n'est pas valide on retourne une erreur 400 "Bad Request"
 
     #sinon
     mempool.append(tx) #on ajoute la transaction à la mempool pour qu'elle soit prise en compte dans le prochain block miné
