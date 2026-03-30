@@ -9,6 +9,8 @@
 ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![Blockchain](https://img.shields.io/badge/Blockchain-Simulation-purple?style=for-the-badge)
 ![Proof of Work](https://img.shields.io/badge/Proof%20of%20Work-Mining-orange?style=for-the-badge)
+
+
 ![Status](https://img.shields.io/badge/Status-In%20Development-yellow?style=for-the-badge)
 ![Last commit](https://img.shields.io/github/last-commit/MeuxyVex/WobblyToken?style=for-the-badge)
 
