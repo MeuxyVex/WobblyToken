@@ -6,6 +6,10 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.1.0-brightgreen)](CHANGELOG.md)
+![Repo size](https://img.shields.io/github/repo-size/MeuxyVex/WobblyToken?style=for-the-badge)
+![Last commit](https://img.shields.io/github/last-commit/MeuxyVex/WobblyToken?style=for-the-badge)
+![Issues](https://img.shields.io/github/issues/MeuxyVex/WobblyToken?style=for-the-badge)
+![Stars](https://img.shields.io/github/stars/MeuxyVex/WobblyToken?style=for-the-badge)
 
 
 ## État actuel
