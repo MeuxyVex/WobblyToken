@@ -4,6 +4,7 @@ import os #utilisé pour lire les fichiers config docker
 import time #juste pour faire une pause à la fin du script
 import hashlib #permet de faire du hashage pour le minage des blocks
 import json #permet de convertir les blocks en json pour le hashage et l'envoie entre les nodes
+from wallet import validate_transaction, mempool
 app = Flask(__name__) #initialise le serveur web
 
 NODE_NAME = os.getenv("NODE_NAME") #recup dans le fichier .yml  le nom du node 
@@ -15,7 +16,7 @@ def create_block(data): #création du block
     index = len(blockchain) #num du block
     if len(blockchain) > 0:
         dernier_bloc = blockchain[-1] #recupération dans la liste blockchain du dernier block
-        prev_hash = dernier_bloc["hash"] #recup la valeur hash du dictionnaire du dernier block fai
+        prev_hash = dernier_bloc["hash"] #recup la valeur hash du dictionnaire du dernier block fait
     else:
         prev_hash = "0" #formation du tout premier block
 
@@ -25,15 +26,19 @@ def create_block(data): #création du block
         "previous_hash": prev_hash,
         "nonce": 0,
         "hash": "123456789abcdef", #valeur de hash temporaire pour le minage du block
-        "time": 0
+        "difficulty": 5, #nombre de 0 que doit commencer le hash pour que le block soit valide
+        "time": 0, #temps de minage du block
+        "transactions": [],
+        "reward": 10 #récompense du minage du block, pour l'instant c'est juste une valeur fixe mais on pourrait faire varier cette récompense en fonction de la difficulté du block ou du nombre de transactions validées dans le block
     }
     starttime = time.perf_counter()
-    while block["hash"][0:5] != "00000":
+    while block["hash"][0:block["difficulty"]] != "0" * block["difficulty"]: #avec la variable difficulty on peut faire varier la difficulté du minage du block en changeant le nombre de 0 que doit commencer le hash pour que le block soit valide
         blockjson = (json.dumps(block, sort_keys=True)) #convertit le block en json pour le hashage
         block["hash"] = (hashlib.sha256((blockjson).encode()).hexdigest()) #tant que les 4 premier caractères du hash ne sont pas 0000 on incrémente le nonce et on recalcule le hash 
         block["nonce"] += 1 #incrémetation du nonce pour faire varier le hash et trouver un hash qui commence par 0000
     endtime = time.perf_counter()
     block["time"] = endtime - starttime #calcul du temps de minage du block
+    
     return block                          
 
 @app.route("/mine") #mine un block quand on va sur /mine
@@ -81,7 +86,30 @@ def sync():
 
     return blockchain
 
+
+@app.route("/transaction", methods=["GET"]) #affiche les transactions en attente de validation dans la memepool
+def get_transactions():
+    return jsonify(mempool) #convertit la memepool en json pour l'afficher
+
+
+@app.route("/transaction", methods=["POST"]) #quand on envoie une requete http post à l'adresse /transaction on ajoute la transaction à la memepool
+def add_transaction():
+    tx = request.get_json()#recup la transaction envoyée par le client en json
+    
+    if not tx:
+        return {"status": "Erreur", "message": "Aucune transaction reçue"}, 400 #si aucune transaction n'est reçue on retourne une erreur 400 "Bad Request"
+    
+    if not validate_transaction(tx):
+        return {"status": "Erreur", "message": "Transaction invalide"}, 400 #si la transaction reçue n'est pas valide on retourne une erreur 400 "Bad Request"
+
+    #sinon
+    mempool.append(tx) #on ajoute la transaction à la mempool pour qu'elle soit prise en compte dans le prochain block miné
+    return {"status": "Succès", "message": "Transaction ajoutée au mempool"}, 200 #retour de succès code http 200 "OK" pour indiquer que la transaction a été ajoutée à la mempool
+
+
 if __name__ == "__main__":  #code executé quand on lance :
     time.sleep(3)  # attendre que l'autre node démarre 
     app.run(host="0.0.0.0", port=5000) #lance le serveur accesible depuis docker sur le port 5000
  
+
+
