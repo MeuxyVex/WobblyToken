@@ -1,6 +1,6 @@
 # WobblyToken
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="src/logo.png">
+  <source media="(prefers-color-scheme: dark)" srcset="src/logo1.png">
   <img alt="Python cryptocurrency project">
 </picture>
 
