@@ -25,8 +25,12 @@ git clone https://github.com/MeuxyVex/WobblyToken
 cd WobblyToken/blockchain-simulation
 docker compose up --build
 
+```
 
+## Transactions
+
+```bash
 Transaction -> curl -X POST http://localhost:5001/transaction \
 -H "Content-Type: application/json" \
 -d "{\"sender\":\"Alice\",\"receiver\":\"Bob\",\"amount\":10}"
-
+```
