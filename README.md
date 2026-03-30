@@ -7,6 +7,7 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-Web%20API-black?style=for-the-badge&logo=flask&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+
 ![Blockchain](https://img.shields.io/badge/Blockchain-Simulation-purple?style=for-the-badge)
 ![Proof of Work](https://img.shields.io/badge/Proof%20of%20Work-Mining-orange?style=for-the-badge)
 
