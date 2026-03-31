@@ -17,10 +17,10 @@ PEER = os.getenv("PEER") #recup l'adresse http de l'autre node
 
 blockchain = [] #init de la liste des block
 temps = 10 #on veut que le block soit miner environ tte les 10 secondes pour éviter le ddosage du réseau, pour que les nodes aient le temps de se sycro et pour que les transactions aient le temps d'être ajoutées à la mempool et prises en compte dans les blocks minés
-interval = 5 #interval de 5 blocks pour l'augmentation de la difficulté 
+intervaldifficulty = 5 #interval de 5 blocks pour l'augmentation de la difficulté 
 min_difficulty = 1 #difficulté minimale pour éviter d'avoir une difficulté de 0 ou négative
 BaseReward = 50 # récompense de base, la plus haute
-Interval = 10 # Interval de 10 blocks
+IntervalReward = 10 # Interval de 10 blocks
 
 # =========================
 # Definition de fonctions
@@ -35,16 +35,18 @@ def hash_calcul(block):
 
 def get_difficulty():
         if len(blockchain) == 0:
-            return 4 #si c'est le premier block on met une difficulté de 4
+            return 4 #si c'est le premier block on met une difficulté de 4 de base
         
-        last_difficulty = blockchain[-1]["difficulty"] #récupère la difficulté du dernier block ou 5 si c'est le premier block
+        #si ce n'est pas le premier block :
+        last_difficulty = blockchain[-1]["difficulty"] #récupère la difficulté du dernier block 
         
-        if len(blockchain) % interval != 0: #nombre total de block dans la blockchain modulo l'interval de 5 blocks pour savoir si on doit augmenter la difficulté ou pas
-            return last_difficulty
+        if len(blockchain) % intervaldifficulty != 0: #nombre total de block dans la blockchain modulo l'interval de 5 blocks pour savoir si on doit augmenter la difficulté ou pas
+            return last_difficulty #si on a un reste c'est qu'on n'est pas à un interval de 5 blocks et donc on garde la même difficulté pour éviter d'avoir une difficulté qui change tout le temps et pour que les mineurs puissent s'adapter à la difficulté du réseau
         
-        Intervaldesblock = blockchain[-interval:] #récupère les 5 derniers blocks pour calculer le temps de minage moyen blockchain[-5:] donne les 5 derniers éléments de la liste blockchain
+        #si on est à un interval de 5 blocks :
+        Intervaldesblock = blockchain[-intervaldifficulty:] #récupère les 5 (qui correspond a la valeur de l'interval) derniers blocks pour calculer le temps de minage moyen blockchain[-5:] donne les 5 derniers éléments de la liste blockchain
         temps_calculé = sum(block["time"] for block in Intervaldesblock) #additionne le temps de minage de ces 5 blocks.
-        temps_attendu = temps * interval
+        temps_attendu = temps * intervaldifficulty  #calcul du temps qui était attendu en l'occurence 10 x 5 donc environ 10 secondes par block
         ratio = temps_calculé / temps_attendu #calcul du ratio pour voir si le minage est trop difficile ou pas
         if ratio < 0.9:
             return last_difficulty + 1 #augemente la difficulté de 1 pour rendre le minage plus difficile si le temps de minage est trop court, on veut que le temps de minage soit proche de 10 secondes pour éviter le ddosage du réseau et pour que les nodes aient le temps de se sycro et pour que les transactions aient le temps d'être ajoutées à la mempool et prises en compte dans les blocks minés
@@ -54,7 +56,7 @@ def get_difficulty():
             return last_difficulty #si le ratio est entre 0.9 et 1.1 on garde la même difficulté pour maintenir un temps de minage stable autour de 10 secondes
 
 def get_block_reward(i):
-    multiplier = i // Interval # i est le numéro du block qu'on divise par l'interval pour nous donner le coef de la récompense donc pour savoir a quel palier on est
+    multiplier = i // IntervalReward # i est la variable qui prendra le numéro du block qu'on divise par l'interval pour nous donner le coef de la récompense donc pour savoir a quel palier on est
     reward = BaseReward / (2 ** multiplier) # on divise la reward par 2 puissance le coef pour faire une récompense qui diminue de moitié tous les 10 blocks
     return max(1, reward) # limite à 1 la rewrad la plus basse on renvoit le plus grand de reward ou de 1 pour éviter d'avoir une récompense de 0 ou de 0.5 etc... 
 
