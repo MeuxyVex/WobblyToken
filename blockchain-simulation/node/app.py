@@ -60,6 +60,10 @@ def get_block_reward(i):
 
 
 
+# =========================
+# Fonction principale avec boucle principale de minage
+# =========================
+
 def create_block(data): #création du block
     index = len(blockchain) #num du block
 
@@ -104,10 +108,15 @@ def create_block(data): #création du block
 #Méthode GET : Lire, récupérér des données, etc...
 #Méthode POST : Créer une qql chose, envoyer des données, modifier une variable, etc...
 
+# =========================
+# Partie Minage et blockchain
+# =========================
 
 @app.route("/") #quand on va à l'adresse racine du serveur web du node affiche la page index.html
 def home():
     return render_template("index.html", node_name = NODE_NAME, peer = PEER) #affiche la page index.html qui est dans le dossier templates du node
+
+
 @app.route("/mine") #mine un block quand on va sur /mine
 def mine():
     block = create_block(f"Block de {NODE_NAME}") #création du block avec le nom du node + appel de la fonction create_block pour le minage du block
@@ -153,6 +162,10 @@ def sync():
 
     return blockchain
 
+
+# =========================
+# Partie Transactions
+# =========================
 
 @app.route("/transaction", methods=["GET"]) #affiche les transactions en attente de validation dans la memepool
 def get_transactions():
