@@ -33,14 +33,14 @@ Mini-blockchain avec 2 nœuds qui communiquent, minent et mettent à jour une bl
 - `/receive_block` : reçoit un bloc depuis l’autre nœud
 - `/chain` : affiche la blockchain
 - `/sync` : synchronise la blockchain avec l’autre nœud
-- `/transaction` : Affiche le mempool avec méthode GET et envoie des transactions avec POST 
+- `/transaction` : Affiche le mempool avec méthode GET et envoie des transactions avec POST
 
 ## Urls
 
 http://localhost:5001/....
 http://localhost:5002/....
 
-Remplace les .... avec une des routes si dessus
+Remplace les .... avec une des routes si dessus ou utilise les boutons interactif depuis la page html interactive au root -> http://localhost:5001/
 
 ## Utilisation
 
