@@ -1,5 +1,5 @@
 # =========================
-# Definition de variables et import 
+# VARIABLES ET IMPORTS
 # =========================
 
 from flask import Flask, request, jsonify, render_template #flask permet de crée un serveur au node.
@@ -8,7 +8,7 @@ import os #utilisé pour lire les fichiers config docker
 import time #juste pour faire une pause à la fin du script et pour calculer le temps de minage des blocks
 import hashlib #permet de faire du hashage pour le minage des blocks
 import json #permet de convertir les blocks en json pour le hashage et l'envoie entre les nodes
-from wallet import validate_transaction, mempool
+from wallet import mempool, validation, generationkeys, generation_addresse, signature #import des fonctions utilisés de wallet
 
 app = Flask(__name__) #initialise le serveur web
 
@@ -23,7 +23,7 @@ BaseReward = 50 # récompense de base, la plus haute
 IntervalReward = 10 # Interval de 10 blocks
 
 # =========================
-# Definition de fonctions
+# DEFINITION FONCTIONS
 # =========================
 
 def hash_calcul(block):
@@ -63,7 +63,7 @@ def get_block_reward(i):
 
 
 # =========================
-# Fonction principale avec boucle principale de minage
+# FONCTION PRINCIPAL ET BOUCLE PRINCIPAL
 # =========================
 
 def create_block(data): #création du block
@@ -83,7 +83,7 @@ def create_block(data): #création du block
         "hash": "", #valeurr du hash 
         "difficulty": get_difficulty(), #nombre de 0 que doit commencer le hash pour que le block soit valide
         "time": 0, #temps de minage du block
-        "transactions": [],
+        "transactions": mempool.copy(), #on ajoute les transactions en attente de validation dans la mempool au block pour qu'elles soient prises en compte dans le minage du block et pour que les transactions soient validées et ajoutées à la blockchain
         "reward": get_block_reward(index)
     }
 
@@ -104,14 +104,14 @@ def create_block(data): #création du block
 
 
 # =========================
-# Partie Flask
+# PARTIE FLASK
 # =========================
 
 #Méthode GET : Lire, récupérér des données, etc...
 #Méthode POST : Créer une qql chose, envoyer des données, modifier une variable, etc...
 
 # =========================
-# Partie Minage et blockchain
+# PARTIE MINAGE ET BLOCKCHAIN
 # =========================
 
 @app.route("/") #quand on va à l'adresse racine du serveur web du node affiche la page index.html
@@ -123,6 +123,8 @@ def home():
 def mine():
     block = create_block(f"Block de {NODE_NAME}") #création du block avec le nom du node + appel de la fonction create_block pour le minage du block
     blockchain.append(block)
+
+    mempool.clear() #on vide la mempool après avoir ajouté les transactions au block pour que les transactions soient prises en compte dans le block miné et pour que la mempool soit prête à recevoir de nouvelles transactions en attente de validation pour le prochain block à miner
 
     try:
         requests.post(f"{PEER}/receive_block", json=block) #envoie le block son format json http à l'autre node à l'adresse de la peer sur /receiveblock  
@@ -166,7 +168,7 @@ def sync():
 
 
 # =========================
-# Partie Transactions
+# PARTIE TRANSACTIONS
 # =========================
 
 @app.route("/transaction", methods=["GET"]) #affiche les transactions en attente de validation dans la memepool
@@ -181,13 +183,55 @@ def add_transaction():
     if not tx:
         return {"status": "Erreur", "message": "Aucune transaction reçue"}, 400 #si aucune transaction n'est reçue on retourne une erreur 400 "Bad Request"
     
-    if not validate_transaction(tx):
-        return {"status": "Erreur", "message": "Transaction invalide, vérifiez que les champs soient corrects"}, 400 #si la transaction reçue n'est pas valide on retourne une erreur 400 "Bad Request"
+    valeurbool, message = validation(tx)
+    if not valeurbool:
+        return {"status": "Erreur", "message": message}, 400 #si la transaction reçue n'est pas valide on retourne une erreur 400 "Bad Request"
 
     #sinon
     mempool.append(tx) #on ajoute la transaction à la mempool pour qu'elle soit prise en compte dans le prochain block miné
     return {"status": "Succès", "message": "Transaction ajoutée au mempool"}, 200 #retour de succès code http 200 "OK" pour indiquer que la transaction a été ajoutée à la mempool
 
+
+@app.route("/generate_keys", methods=["GET"]) #generation de la pair de clé
+def generate_keys_route():
+    keys = generationkeys() #fonction de wallet.py pour générer la clé privée et la clé publique
+    address = generation_addresse(keys["public_key"]) #fonction de wallet.py pour générer l'adresse à partir de la clé publique
+
+    return jsonify({ #retourne sous format de dictionnaire en json la clé privée, la clé publique et l'adresse du wallet généré
+        "private_key": keys["private_key"],
+        "public_key": keys["public_key"],
+        "address": address
+    })
+
+
+@app.route("/sign_transaction", methods=["POST"]) #signement de la transaction
+def sign_transaction_route():
+    data = request.get_json() #recup la transaction que le client à envoyé, (retourne un dictionnaire python à partir du json envoyé par le client)
+
+    required = [ #champs requis pour pouvoir signer la transaction
+        "sender_address",
+        "sender_public_key",
+        "receiver_address",
+        "amount",
+        "private_key"
+    ]
+
+    for i in required: #verification que tous les champs requis sont présents dans la transaction envoyée par le client
+        if i not in data:
+            return {"status": "Erreur", "message": "syntaxe invalide"}, 400
+
+    tx = { #création de la transaction à signer à partir des données envoyées par le client
+        "sender_address": data["sender_address"],
+        "sender_public_key": data["sender_public_key"],
+        "receiver_address": data["receiver_address"],
+        "amount": data["amount"]
+    }
+
+    try: #signement de la transaction 
+        signement = signature(tx, data["private_key"]) #fonnction de wallet.py pour signer
+        return {"status": "Succès","signature": signement}, 200
+    except Exception:
+        return {"status": "Erreur", "message": "Impossible de signer la transaction"}, 400
 
 if __name__ == "__main__":  #code executé quand on lance :
     time.sleep(3)  # attendre que l'autre node démarre 

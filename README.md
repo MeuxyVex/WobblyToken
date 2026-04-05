@@ -53,8 +53,5 @@ docker compose up --build
 
 ## Transactions
 
-```bash
-curl -X POST http://localhost:5001/transaction \
--H "Content-Type: application/json" \
--d "{\"sender\":\"Alice\",\"receiver\":\"Bob\",\"amount\":10}"
-```
+Il faut générer la paire de clé et l'adresse publique puis signer la transactions puis l'envoyer.
+Il faut faire pareil sur l'autre node pour obtenir son adresse publique.

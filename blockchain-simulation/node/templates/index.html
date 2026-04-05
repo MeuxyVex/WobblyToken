@@ -13,12 +13,12 @@
       padding: 24px;
     }
 
-    h1, h2 {
+    h1, h2, h3 {
       margin-top: 0;
     }
 
     .container {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: auto;
     }
 
@@ -35,6 +35,11 @@
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
+    }
+
+    .col {
+      flex: 1 1 320px;
+      min-width: 280px;
     }
 
     button {
@@ -56,7 +61,7 @@
       cursor: not-allowed;
     }
 
-    input {
+    input, textarea {
       width: 100%;
       padding: 10px;
       border-radius: 10px;
@@ -65,6 +70,11 @@
       color: white;
       box-sizing: border-box;
       margin-top: 6px;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
     }
 
     label {
@@ -114,6 +124,13 @@
       vertical-align: middle;
     }
 
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
@@ -132,7 +149,7 @@
 
     <div class="card">
       <h2>Actions blockchain</h2>
-      <div class="row">
+      <div class="actions">
         <button id="mineBtn" onclick="mineBlock()">Miner un bloc</button>
         <button onclick="syncChain()">Sync</button>
         <button onclick="showChain()">Voir la blockchain</button>
@@ -146,24 +163,66 @@
     </div>
 
     <div class="card">
-      <h2>Envoyer une transaction</h2>
+      <h2>Wallets</h2>
+      <p class="muted">
+        Pour ton projet, la clé privée est affichée pour pouvoir signer côté interface.
+      </p>
 
-      <label>
-        Sender
-        <input type="text" id="sender" placeholder="Alice">
-      </label>
+      <div class="row">
+        <div class="col">
+          <h3>Sender</h3>
+          <div class="actions">
+            <button onclick="generateWallet('sender')">Générer wallet sender</button>
+          </div>
 
-      <label>
-        Receiver
-        <input type="text" id="receiver" placeholder="Bob">
-      </label>
+          <label>
+            Sender private key
+            <textarea id="sender_private_key" placeholder="Clé privée du sender"></textarea>
+          </label>
+
+          <label>
+            Sender public key
+            <textarea id="sender_public_key" placeholder="Clé publique du sender"></textarea>
+          </label>
+
+          <label>
+            Sender address
+            <input type="text" id="sender_address" placeholder="Adresse du sender">
+          </label>
+        </div>
+
+        <div class="col">
+          <h3>Receiver</h3>
+          <div class="actions">
+            <button onclick="generateWallet('receiver')">Générer wallet receiver</button>
+          </div>
+
+          <label>
+            Receiver address
+            <input type="text" id="receiver_address" placeholder="Adresse du receiver">
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Transaction</h2>
 
       <label>
         Amount
-        <input type="number" id="amount" placeholder="10" step="any">
+        <input type="number" id="amount" placeholder="10" step="any" min="0">
       </label>
 
-      <button onclick="sendTransaction()">Envoyer la transaction</button>
+      <label>
+        Signature
+        <textarea id="signature" placeholder="La signature sera générée automatiquement"></textarea>
+      </label>
+
+      <div class="actions">
+        <button onclick="signTransaction()">Signer la transaction</button>
+        <button onclick="sendTransaction()">Envoyer la transaction</button>
+      </div>
+
       <p id="status"></p>
     </div>
 
@@ -178,9 +237,8 @@
     const statusEl = document.getElementById("status");
 
     function setOutput(data) {
-      output.textContent = typeof data === "string"
-        ? data
-        : JSON.stringify(data, null, 2);
+      output.textContent =
+        typeof data === "string" ? data : JSON.stringify(data, null, 2);
     }
 
     function setStatus(message, isError = false) {
@@ -243,26 +301,63 @@
       }
     }
 
-    async function sendTransaction() {
-      const sender = document.getElementById("sender").value.trim();
-      const receiver = document.getElementById("receiver").value.trim();
+    async function generateWallet(target) {
+      try {
+        const res = await fetch("/generate_keys");
+        const data = await res.json();
+
+        setOutput(data);
+
+        if (!res.ok) {
+          setStatus(data.message || "Erreur pendant la génération des clés.", true);
+          return;
+        }
+
+        if (target === "sender") {
+          document.getElementById("sender_private_key").value = data.private_key || "";
+          document.getElementById("sender_public_key").value = data.public_key || "";
+          document.getElementById("sender_address").value = data.address || "";
+          setStatus("Wallet sender généré.");
+        } else {
+          document.getElementById("receiver_address").value = data.address || "";
+          setStatus("Wallet receiver généré.");
+        }
+      } catch (err) {
+        setStatus("Erreur pendant la génération des clés.", true);
+      }
+    }
+
+    async function signTransaction() {
+      const sender_address = document.getElementById("sender_address").value.trim();
+      const sender_public_key = document.getElementById("sender_public_key").value.trim();
+      const receiver_address = document.getElementById("receiver_address").value.trim();
+      const private_key = document.getElementById("sender_private_key").value.trim();
       const amount = Number(document.getElementById("amount").value);
 
-      if (!sender || !receiver || !Number.isFinite(amount)) {
-        setStatus("Remplis sender, receiver et amount correctement.", true);
+      if (
+        !sender_address ||
+        !sender_public_key ||
+        !receiver_address ||
+        !private_key ||
+        !Number.isFinite(amount) ||
+        amount <= 0
+      ) {
+        setStatus("Remplis d'abord sender, receiver, amount et la private key.", true);
         return;
       }
 
       try {
-        const res = await fetch("/transaction", {
+        const res = await fetch("/sign_transaction", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            sender,
-            receiver,
-            amount
+            sender_address,
+            sender_public_key,
+            receiver_address,
+            amount,
+            private_key
           })
         });
 
@@ -270,9 +365,59 @@
         setOutput(data);
 
         if (res.ok) {
-          setStatus("Transaction envoyée.");
+          document.getElementById("signature").value = data.signature || "";
+          setStatus("Transaction signée avec succès.");
         } else {
-          setStatus("Transaction refusée.", true);
+          setStatus(data.message || "Erreur pendant la signature.", true);
+        }
+      } catch (err) {
+        setStatus("Erreur pendant la signature.", true);
+      }
+    }
+
+    async function sendTransaction() {
+      const sender_address = document.getElementById("sender_address").value.trim();
+      const sender_public_key = document.getElementById("sender_public_key").value.trim();
+      const receiver_address = document.getElementById("receiver_address").value.trim();
+      const signature = document.getElementById("signature").value.trim();
+      const amount = Number(document.getElementById("amount").value);
+
+      if (
+        !sender_address ||
+        !sender_public_key ||
+        !receiver_address ||
+        !signature ||
+        !Number.isFinite(amount) ||
+        amount <= 0
+      ) {
+        setStatus("Remplis tous les champs correctement puis signe la transaction.", true);
+        return;
+      }
+
+      const tx = {
+        sender_address,
+        sender_public_key,
+        receiver_address,
+        amount,
+        signature
+      };
+
+      try {
+        const res = await fetch("/transaction", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(tx)
+        });
+
+        const data = await res.json();
+        setOutput(data);
+
+        if (res.ok) {
+          setStatus(data.message || "Transaction envoyée.");
+        } else {
+          setStatus(data.message || "Transaction refusée.", true);
         }
       } catch (err) {
         setStatus("Erreur pendant l’envoi de la transaction.", true);
