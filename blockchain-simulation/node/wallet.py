@@ -67,9 +67,9 @@ def validation(tx):
         return False, "Adresse de l'expéditeur ne correspond pas à la clé publique"
     
     try:
-        public_key = ecdsa.VerifyingKey.from_string(bytes.fromhex(tx["sender_public_key"]), curve=ecdsa.SECP256k1) #reconstruction de la clé publique à partir de la transaction
+        public_key = ecdsa.VerifyingKey.from_string(bytes.fromhex(tx["sender_public_key"]), curve=ecdsa.SECP256k1) #convertit le string dans la clé publique en octets puis ces octets en un objet clé publique ecdsa
         message = syntaxe(tx) #génération du message à vérifier à partir de la transaction
-        verification = public_key.verify(bytes.fromhex(tx["signature"]), message) #vérification de la signature à l'aide de la clé publique
+        verification = public_key.verify(bytes.fromhex(tx["signature"]), message) #vérification que la signature correspond à la clé publique déclaré et le contenu de la transaction
         if not verification:
             return False, "Signature invalide"
         
