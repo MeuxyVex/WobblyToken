@@ -26,7 +26,9 @@ def add_node(node_name, address):
     connection = sqlite3.connect(name) #se reco a la db
     cursor = connection.cursor() #recrée donc le curseur pour exectuer la commande sql
 
-    cursor.execute("INSERT INTO nodes (node_name, address) VALUES (?, ?)", (node_name, address)) 
+    cursor.execute("INSERT OR IGNORE INTO nodes (node_name, address) VALUES (?, ?)", (node_name, address)) 
+    #Ajout du "OR IGNORE" pour éviter les erreurs quand on essaye d'insérer un noeud qui existe déjà dans la DB.
+    #OR IGNORE vérifie si il y a un doublon et si c'est le cas il ignore l'insertion.
 
     connection.commit()
     connection.close()
@@ -37,12 +39,29 @@ def add_node(node_name, address):
 
 
 # =========================
-# RECUPERATION DES NODES
+# RECUPERATION DES DONNEES
 # =========================
 
 def get_nodes():
     connection = sqlite3.connect(name) 
+
+    connection.row_factory = sqlite3.Row #transforme les résultats de fetchall() en objets row des sortes de dictionnaire ou quand on
     cursor = connection.cursor()
+    cursor.execute("SELECT * FROM nodes ORDER BY id") #récupère tous les noeuds de la table nodes triés par id
+    #on doit les retransformer en liste de dictionnaire car Flask ne travaille pas avec des objets Row mais avec des dictionnaires python
+
+
+    rows = cursor.fetchall() #va nous servir avec la commande SQL SELECT, le fetchall() récupère les résultats de SELECT et les stocke sous forme de liste d'objets Row grace à la ligne connection.row_factory = sqlite3.Row.
+    nodes = [] #initalisation de la liste qui va stocker les noeuds en dictionnaire
+
+
+    for i in rows: #pour toutes les lignes dans le fetchall():
+        node = dict(i) #convertit la ligne de résultats d'un objet Row en dictionnaire
+        nodes.append(node) #ajout du dictionnaire de noeud à la liste nodes
+
+    connection.close() #ferme la connexion à la base de données
+
+    return nodes #retourne la grande liste de dictionnaire
 
     
 
