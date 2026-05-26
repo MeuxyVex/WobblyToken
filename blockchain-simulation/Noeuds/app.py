@@ -13,7 +13,7 @@ from wallet import mempool, validation, generationkeys, generation_addresse, sig
 app = Flask(__name__) #initialise le serveur web
 
 NODE_NAME = os.getenv("NODE_NAME") #recup dans le fichier .yml  le nom du node 
-PEER = os.getenv("PEER") #recup l'adresse http de l'autre node
+REGISTRY_URL = os.getenv("REGISTRY_URL") #recup dans le fichier .yml l'url du registre pour s'enregistrer et récupérer les autres nodes
 
 blockchain = [] #init de la liste des block
 temps = 10 #on veut que le block soit miner environ tte les 10 secondes pour éviter le ddosage du réseau, pour que les nodes aient le temps de se sycro et pour que les transactions aient le temps d'être ajoutées à la mempool et prises en compte dans les blocks minés
@@ -232,6 +232,30 @@ def sign_transaction_route():
         return {"status": "Succès","signature": signement}, 200
     except Exception:
         return {"status": "Erreur", "message": "Impossible de signer la transaction"}, 400
+
+
+def enregistrement():
+    try:
+        requests.post(f"{REGISTRY_URL}/register", json={"node_name": NODE_NAME, "address": f"http://{NODE_NAME}:5000"}, timeout=3)
+        #envoie une requete http post au registre pour s'enregistrer dans la base de données du registre avec le nom du node et son adresse
+    except:
+        return False #si l'enregistrement échoue on retourne False pour pouvoir réessayer plus tard dans la boucle principale
+    return True #si l'enregistrement réussit on retourne True
+
+def get_peers():
+    try:
+        retour = requests.get(f"{REGISTRY_URL}/nodes", timeout=3).json() #envoie une requete http get au registre pour récupérer la liste de tous les noeuds enregistrés dans la base de données du registre
+        
+        data = retour.json() #convertit la réponse en json pour pouvoir l'utiliser
+        peers =[]
+
+        for i in data: #pour chaque noeud dans la liste de tous les noeuds récupérés du registre
+            peers.append(i["address"]) #on ajoute l'adresse du noeud à la liste des peers pour pouvoir communiquer avec lui
+        return peers #retourne la liste des peers pour que le node puisse communiquer avec eux et s'y synchroniser
+        
+    except:
+        return [] #si la récupération échoue on retourne une liste vide
+    
 
 if __name__ == "__main__":  #code executé quand on lance :
     time.sleep(3)  # attendre que l'autre node démarre 

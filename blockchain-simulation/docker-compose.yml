@@ -1,18 +1,43 @@
-version: "3"
 
-services:
-  node1:
-    build: ./node
+services: #annonce la liste des conteneurs que docker compose doit créer
+  registry: #le conteneur qui va fair office de registre pour les nodes
+    build: ./Database #indique le chemin du Dockerfile pour construire l'image du conteneur
     ports:
-      - "5001:5000"
+      - "6000:6000"
+    volumes:
+      - registry-data:/app/data #permet de stocker les données du registre même si il est arrêté ou supprimé dans un dossier data
+    restart: unless-stopped #donne l'indcation a docker de le rédémarrer si il s'arrête sauf si il est stoppé par l'utilisateur
+
+  node1:
+    build: ./Noeuds
+    ports:
+      - "5001:5000" #ports ou il sera accessible depuis l'extérieur du conteneur
+    depends_on: #annonce que node1 dépend du registery pour s'enregistrer dans la db donc docker démarrera registery avant node1
+      - registry
     environment:
-      - NODE_NAME=node1
-      - PEER=http://node2:5000
+      - NODE_NAME=node1 #variable utiliser dans le code principal pour différencier les noeuds
+      - REGISTRY_URL=http://registry:6000 #variable pour indiquer l'url du registre
 
   node2:
-    build: ./node
+    build: ./Noeuds
     ports:
       - "5002:5000"
+    depends_on:
+      - registry
     environment:
       - NODE_NAME=node2
-      - PEER=http://node1:5000
+      - REGISTRY_URL=http://registry:6000
+
+  node3:
+    build: ./Noeuds
+    ports:  
+      - "5003:5000"
+    depends_on: 
+      - registry
+    environment:  
+      - NODE_NAME=node3
+      - REGISTRY_URL=http://registry:6000
+
+volumes:
+  registry-data:
+  
