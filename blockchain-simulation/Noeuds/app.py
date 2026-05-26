@@ -14,6 +14,7 @@ app = Flask(__name__) #initialise le serveur web
 
 NODE_NAME = os.getenv("NODE_NAME") #recup dans le fichier .yml  le nom du node 
 REGISTRY_URL = os.getenv("REGISTRY_URL") #recup dans le fichier .yml l'url du registre pour s'enregistrer et récupérer les autres nodes
+PEER = os.getenv("PEER") #recup dans le fichier .yml l'adresse de la peer pour communiquer avec elle et s'y synchroniser
 
 blockchain = [] #init de la liste des block
 temps = 10 #on veut que le block soit miner environ tte les 10 secondes pour éviter le ddosage du réseau, pour que les nodes aient le temps de se sycro et pour que les transactions aient le temps d'être ajoutées à la mempool et prises en compte dans les blocks minés
@@ -246,19 +247,20 @@ def get_peers():
     try:
         retour = requests.get(f"{REGISTRY_URL}/nodes", timeout=3).json() #envoie une requete http get au registre pour récupérer la liste de tous les noeuds enregistrés dans la base de données du registre
         
-        data = retour.json() #convertit la réponse en json pour pouvoir l'utiliser
         peers =[]
 
-        for i in data: #pour chaque noeud dans la liste de tous les noeuds récupérés du registre
+        for i in retour: #pour chaque noeud dans la liste de tous les noeuds récupérés du registre
             peers.append(i["address"]) #on ajoute l'adresse du noeud à la liste des peers pour pouvoir communiquer avec lui
         return peers #retourne la liste des peers pour que le node puisse communiquer avec eux et s'y synchroniser
         
-    except:
+    except Exception as e :
+        print(f"Erreur lors de la récupération des peers : {e}")
         return [] #si la récupération échoue on retourne une liste vide
     
 
 if __name__ == "__main__":  #code executé quand on lance :
     time.sleep(3)  # attendre que l'autre node démarre 
+    enregistrement()
     app.run(host="0.0.0.0", port=5000) #lance le serveur accesible depuis docker sur le port 5000
  
 

@@ -3,7 +3,7 @@ services: #annonce la liste des conteneurs que docker compose doit créer
   registry: #le conteneur qui va fair office de registre pour les nodes
     build: ./Database #indique le chemin du Dockerfile pour construire l'image du conteneur
     ports:
-      - "6000:6000"
+      - "6001:6000"
     volumes:
       - registry-data:/app/data #permet de stocker les données du registre même si il est arrêté ou supprimé dans un dossier data
     restart: unless-stopped #donne l'indcation a docker de le rédémarrer si il s'arrête sauf si il est stoppé par l'utilisateur
