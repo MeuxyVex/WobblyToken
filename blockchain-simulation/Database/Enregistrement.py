@@ -98,4 +98,4 @@ def peers(node_name):
 
 if __name__ == "__main__":
     create_db() #crée la base de données et la table nodes si elle n'existe pas déjà
-    app.run(host="0.0.0", port=6000) #démarre le serveur Flask sur le port 6000 et accepte les connexions depuis l'extérieur du conteneur
+    app.run(host="0.0.0.0", port=6000) #démarre le serveur Flask sur le port 6000 et accepte les connexions depuis l'extérieur du conteneur

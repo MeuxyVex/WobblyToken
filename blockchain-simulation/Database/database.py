@@ -1,5 +1,5 @@
 import sqlite3
-name = "blockchain.db"
+Database = "data/blockchain.db"
 
 
 # =========================
@@ -8,7 +8,7 @@ name = "blockchain.db"
 
 def create_db():
 
-    connection = sqlite3.connect(name) #crée automatiquement la base de données vide si elle n'existe pas et s'y connecte
+    connection = sqlite3.connect(Database) #crée automatiquement la base de données vide si elle n'existe pas et s'y connecte
     cursor = connection.cursor() # crée le curseur pour exécuter les commandes SQL et pour parcourir les lques de résultats
 
     cursor.execute("CREATE TABLE IF NOT EXISTS nodes (id INTEGER PRIMARY KEY AUTOINCREMENT,node_name TEXT UNIQUE NOT NULL,address TEXT UNIQUE NOT NULL)")
@@ -23,7 +23,7 @@ def create_db():
 # =========================
 
 def add_node(node_name, address):
-    connection = sqlite3.connect(name) #se reco a la db
+    connection = sqlite3.connect(Database) #se reco a la db
     cursor = connection.cursor() #recrée donc le curseur pour exectuer la commande sql
 
     cursor.execute("INSERT OR IGNORE INTO nodes (node_name, address) VALUES (?, ?)", (node_name, address)) 
@@ -43,7 +43,7 @@ def add_node(node_name, address):
 # =========================
 
 def get_nodes():
-    connection = sqlite3.connect(name) 
+    connection = sqlite3.connect(Database) 
 
     connection.row_factory = sqlite3.Row #transforme les résultats de fetchall() en objets row des sortes de dictionnaire ou quand on
     cursor = connection.cursor()
