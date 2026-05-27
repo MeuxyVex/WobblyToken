@@ -249,11 +249,11 @@ def enregistrement():
 
 def get_peers():
     try:
-        retour = requests.get(f"{REGISTRY_URL}/peer/{NODE_NAME}", timeout=3).json() #envoie une requete http get au registre pour récupérer la liste de tous les noeuds enregistrés dans la base de données du registre
+        retour = requests.get(f"{REGISTRY_URL}/peers/{NODE_NAME}", timeout=3).json() #envoie une requete http get au registre pour récupérer la liste de tous les noeuds enregistrés dans la base de données du registre
         
         peers =[]
 
-        for i in retour: #pour chaque noeud dans la liste de tous les noeuds récupérés du registre
+        for i in retour["peers"]: #pour chaque noeud dans la liste de tous les noeuds récupérés du registre
             peers.append(i["address"]) #on ajoute l'adresse du noeud à la liste des peers pour pouvoir communiquer avec lui
         return peers #retourne la liste des peers pour que le node puisse communiquer avec eux et s'y synchroniser
         
