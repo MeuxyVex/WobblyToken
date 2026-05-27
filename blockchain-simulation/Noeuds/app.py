@@ -117,7 +117,7 @@ def create_block(data): #création du block
 
 @app.route("/") #quand on va à l'adresse racine du serveur web du node affiche la page index.html
 def home():
-    return render_template("index.html", node_name = NODE_NAME, peer = PEER) #affiche la page index.html qui est dans le dossier templates du node
+    return render_template("index.html", node_name = NODE_NAME, peer = get_peers()) #affiche la page index.html qui est dans le dossier templates du node
 
 
 @app.route("/mine") #mine un block quand on va sur /mine
@@ -127,12 +127,13 @@ def mine():
 
     mempool.clear() #on vide la mempool après avoir ajouté les transactions au block pour que les transactions soient prises en compte dans le block miné et pour que la mempool soit prête à recevoir de nouvelles transactions en attente de validation pour le prochain block à miner
 
-    try:
-        requests.post(f"{PEER}/receive_block", json=block) #envoie le block son format json http à l'autre node à l'adresse de la peer sur /receiveblock  
-    except:
-        pass
+    for i in get_peers(): #pour chaque peer dans la liste des peers récupérée du registre
+        try:
+            requests.post(f"{i}/receive_block", json=block, timeout=3) #envoie une requete http post à chaque peer pour lui envoyer le block miné et qu'il puisse l'ajouter à sa blockchain s'il est valide
+        except:
+            pass #si l'envoie du block échoue on ignore l'erreur
 
-    return block #retourne le block sinon rien
+    return jsonify(block) #retourne le block sinon rien
 
 @app.route("/receive_block", methods=["POST"]) 
 def receive_block():
@@ -157,15 +158,18 @@ def get_chain():
     
 @app.route("/sync") #récupère la block chain de l'autre node 
 def sync():     
-    try:
-        peer_chain = requests.get(f"{PEER}/chain").json() #demande toute la blockchain à l'autre node
-        global blockchain #la liste blockchain est en dehors des fonctions et donc  si global n'est pas utilisé la valeur serait celle tout en haut donc [], rien
-        if len(peer_chain) > len(blockchain):
-            blockchain = peer_chain #si la blockchain de l'autre node est plus longue que la notre on la remplace par la sienne pour être à jour
-    except:
-        pass
+    global blockchain #la liste blockchain est en dehors des fonctions et donc  si global n'est pas utilisé la valeur serait celle tout en haut donc [], rien
+    
+    for i in get_peers(): #pour chaque peer dans la liste des peers récupérée du registre
+        try:
+            peer_chain = requests.get(f"{i}/chain").json() #demande toute la blockchain à l'autre node
 
-    return blockchain
+            if len(peer_chain) > len(blockchain):
+                blockchain = peer_chain #si la blockchain de l'autre node est plus longue que la notre on la remplace par la sienne pour être à jour
+        except:
+            pass
+
+    return jsonify(blockchain)
 
 
 # =========================
@@ -245,7 +249,7 @@ def enregistrement():
 
 def get_peers():
     try:
-        retour = requests.get(f"{REGISTRY_URL}/nodes", timeout=3).json() #envoie une requete http get au registre pour récupérer la liste de tous les noeuds enregistrés dans la base de données du registre
+        retour = requests.get(f"{REGISTRY_URL}/peer/{NODE_NAME}", timeout=3).json() #envoie une requete http get au registre pour récupérer la liste de tous les noeuds enregistrés dans la base de données du registre
         
         peers =[]
 
