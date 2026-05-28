@@ -3,52 +3,242 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WobblyToken</title>
+  <title>WobblyToken Network</title>
+
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      margin: 0;
-      padding: 24px;
+    * {
+      box-sizing: border-box;
     }
 
-    h1, h2, h3 {
-      margin-top: 0;
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      color: #e5e7eb;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.22), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.18), transparent 35%),
+        #020617;
     }
 
     .container {
-      max-width: 1100px;
+      max-width: 1350px;
       margin: auto;
+      padding: 24px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 34px;
+      letter-spacing: -1px;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: #94a3b8;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.18);
+      border: 1px solid rgba(96, 165, 250, 0.35);
+      color: #bfdbfe;
+      font-weight: bold;
+      margin: 4px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    @media (max-width: 800px) {
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    }
+
+    .stat-value {
+      font-size: 30px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .stat-label {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 1050px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     .card {
-      background: #1e293b;
-      border: 1px solid #334155;
-      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 22px;
       padding: 18px;
-      margin-bottom: 18px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(10px);
     }
 
-    .row {
+    .card h2, .card h3 {
+      margin-top: 0;
+    }
+
+    .network-area {
+      position: relative;
+      height: 520px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background:
+        linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
+      background-size: 34px 34px;
+    }
+
+    #networkSvg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .link {
+      stroke: rgba(96, 165, 250, 0.75);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 10 8;
+      animation: dash 1.8s linear infinite;
+    }
+
+    .db-link {
+      stroke: rgba(168, 85, 247, 0.45);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-dasharray: 4 7;
+    }
+
+    @keyframes dash {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: -36; }
+    }
+
+    .node {
+      position: absolute;
+      width: 128px;
+      min-height: 88px;
+      transform: translate(-50%, -50%);
+      border-radius: 18px;
+      padding: 12px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
+      border: 1px solid rgba(96, 165, 250, 0.45);
+      box-shadow: 0 0 26px rgba(37, 99, 235, 0.22);
+      z-index: 5;
+    }
+
+    .node.current {
+      border-color: #22c55e;
+      box-shadow: 0 0 32px rgba(34, 197, 94, 0.32);
+    }
+
+    .node-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .node-name {
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .node-address {
+      margin-top: 4px;
+      font-size: 11px;
+      color: #94a3b8;
+      word-break: break-word;
+    }
+
+    .db-box {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 145px;
+      transform: translate(-50%, -50%);
+      border-radius: 16px;
+      padding: 10px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(88, 28, 135, 0.92), rgba(30, 64, 175, 0.92));
+      border: 1px solid rgba(216, 180, 254, 0.45);
+      box-shadow: 0 0 22px rgba(168, 85, 247, 0.22);
+      z-index: 4;
+    }
+
+    .db-icon {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .db-title {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .db-sub {
+      color: #ddd6fe;
+      font-size: 9px;
+      margin-top: 4px;
+      line-height: 1.25;
+    }
+
+    .actions {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
-    }
-
-    .col {
-      flex: 1 1 320px;
-      min-width: 280px;
+      margin: 14px 0;
     }
 
     button {
-      background: #2563eb;
-      color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 10px 14px;
       cursor: pointer;
+      color: white;
+      background: #2563eb;
       font-weight: bold;
     }
 
@@ -56,175 +246,231 @@
       background: #1d4ed8;
     }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    button.secondary {
+      background: #334155;
+    }
+
+    button.secondary:hover {
+      background: #475569;
     }
 
     input, textarea {
       width: 100%;
-      padding: 10px;
-      border-radius: 10px;
       border: 1px solid #475569;
-      background: #0f172a;
+      border-radius: 12px;
+      background: #020617;
       color: white;
-      box-sizing: border-box;
+      padding: 10px;
       margin-top: 6px;
     }
 
     textarea {
-      min-height: 90px;
+      min-height: 82px;
       resize: vertical;
     }
 
     label {
       display: block;
       margin-bottom: 12px;
+      color: #cbd5e1;
+      font-size: 14px;
     }
 
     pre {
       background: #020617;
-      padding: 16px;
-      border-radius: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 16px;
+      padding: 14px;
+      min-height: 170px;
+      max-height: 330px;
       overflow: auto;
       white-space: pre-wrap;
       word-break: break-word;
-      min-height: 180px;
     }
 
     .muted {
       color: #94a3b8;
-      font-size: 14px;
     }
 
     .success {
       color: #22c55e;
+      font-weight: bold;
     }
 
     .error {
       color: #ef4444;
-    }
-
-    #miningStatus {
-      display: none;
-      margin-top: 12px;
-      color: #93c5fd;
       font-weight: bold;
     }
 
-    .spinner {
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 3px solid #94a3b8;
-      border-top: 3px solid white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-right: 8px;
-      vertical-align: middle;
+    .small-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
     }
 
-    .actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 8px;
+    .small-item {
+      padding: 10px;
+      border-radius: 14px;
+      background: rgba(2, 6, 23, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      font-size: 13px;
     }
 
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    @media (max-width: 900px) {
+      .wallet-grid {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="container">
-    <div class="card">
-      <h1>WobblyToken UI</h1>
-      <p class="muted">
-        Node actuel : <strong>{{ node_name }}</strong><br>
-        Peer : <strong>{{ peer }}</strong>
-      </p>
-    </div>
-
-    <div class="card">
-      <h2>Actions blockchain</h2>
-      <div class="actions">
-        <button id="mineBtn" onclick="mineBlock()">Miner un bloc</button>
-        <button onclick="syncChain()">Sync</button>
-        <button onclick="showChain()">Voir la blockchain</button>
-        <button onclick="showTransactions()">Voir les transactions</button>
+    <div class="hero">
+      <div>
+        <h1 class="title">WobblyToken Network</h1>
+        <p class="subtitle">
+          Visualisation du réseau WobblyToken, des nodes et de la registry SQLite.
+        </p>
       </div>
 
-      <p id="miningStatus">
-        <span class="spinner"></span>
-        Minage en cours...
-      </p>
+      <div>
+        <span class="badge">Node actuel : {{ node_name }}</span>
+        <span class="badge">Registry : {{ registry_url }}</span>
+      </div>
     </div>
 
-    <div class="card">
-      <h2>Wallets</h2>
-      <div class="row">
-        <div class="col">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-value" id="nodeCount">0</div>
+        <div class="stat-label">Nodes enregistrés</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value" id="chainLength">0</div>
+        <div class="stat-label">Blocs locaux</div>
+      </div>
+
+      <div class="stat">
+        <div class="stat-value" id="mempoolSize">0</div>
+        <div class="stat-label">Transactions en attente</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Réseau WobblyToken</h2>
+
+        <div class="network-area" id="networkArea">
+          <svg id="networkSvg"></svg>
+
+          <div class="db-box" id="dbBox">
+            <div class="db-icon">🗄️</div>
+            <div class="db-title">Registry</div>
+            <div class="db-sub">
+              SQLite<br>
+              registry-data
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button onclick="loadNetwork()">Rafraîchir le réseau</button>
+          <button onclick="mineBlock()">Miner un bloc</button>
+          <button class="secondary" onclick="syncChain()">Synchroniser</button>
+          <button class="secondary" onclick="showChain()">Voir blockchain</button>
+        </div>
+
+        <p id="status" class="muted">Interface prête.</p>
+      </div>
+
+      <div class="card">
+        <h2>Détails réseau</h2>
+
+        <div class="small-list">
+          <div class="small-item">
+            <strong>Peers du node actuel</strong>
+            <div id="currentPeers" class="muted">Chargement...</div>
+          </div>
+
+          <div class="small-item">
+            <strong>Relations entre nodes</strong>
+            <div id="relationsList" class="muted">Chargement...</div>
+          </div>
+
+          <div class="small-item">
+            <strong>Registry / SQLite</strong>
+            <div id="databaseInfo" class="muted">Chargement...</div>
+          </div>
+        </div>
+
+        <h3 style="margin-top: 18px;">Résultat</h3>
+        <pre id="output">Clique sur une action...</pre>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 18px;">
+      <h2>Transactions et wallets</h2>
+
+      <div class="wallet-grid">
+        <div>
           <h3>Sender</h3>
+
           <div class="actions">
             <button onclick="generateWallet('sender')">Générer wallet sender</button>
           </div>
 
           <label>
             Sender private key
-            <textarea id="sender_private_key" placeholder="Clé privée du sender"></textarea>
+            <textarea id="sender_private_key"></textarea>
           </label>
 
           <label>
             Sender public key
-            <textarea id="sender_public_key" placeholder="Clé publique du sender"></textarea>
+            <textarea id="sender_public_key"></textarea>
           </label>
 
           <label>
             Sender address
-            <input type="text" id="sender_address" placeholder="Adresse du sender">
+            <input type="text" id="sender_address">
           </label>
         </div>
 
-        <div class="col">
+        <div>
           <h3>Receiver</h3>
+
           <div class="actions">
             <button onclick="generateWallet('receiver')">Générer wallet receiver</button>
           </div>
 
           <label>
             Receiver address
-            <input type="text" id="receiver_address" placeholder="Adresse du receiver">
+            <input type="text" id="receiver_address">
           </label>
+
+          <label>
+            Amount
+            <input type="number" id="amount" placeholder="10" step="any" min="0">
+          </label>
+
+          <label>
+            Signature
+            <textarea id="signature"></textarea>
+          </label>
+
+          <div class="actions">
+            <button onclick="signTransaction()">Signer</button>
+            <button onclick="sendTransaction()">Envoyer transaction</button>
+            <button class="secondary" onclick="showTransactions()">Voir mempool</button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <div class="card">
-      <h2>Transaction</h2>
-
-      <label>
-        Amount
-        <input type="number" id="amount" placeholder="10" step="any" min="0">
-      </label>
-
-      <label>
-        Signature
-        <textarea id="signature" placeholder="La signature sera générée automatiquement"></textarea>
-      </label>
-
-      <div class="actions">
-        <button onclick="signTransaction()">Signer la transaction</button>
-        <button onclick="sendTransaction()">Envoyer la transaction</button>
-      </div>
-
-      <p id="status"></p>
-    </div>
-
-    <div class="card">
-      <h2>Résultat</h2>
-      <pre id="output">Clique sur un bouton…</pre>
     </div>
   </div>
 
@@ -242,25 +488,128 @@
       statusEl.className = isError ? "error" : "success";
     }
 
-    async function mineBlock() {
-      const miningStatus = document.getElementById("miningStatus");
-      const mineButton = document.getElementById("mineBtn");
-
+    async function loadNetwork() {
       try {
-        mineButton.disabled = true;
-        miningStatus.style.display = "block";
+        const res = await fetch("/network");
+        const data = await res.json();
+
+        setOutput(data);
+
+        document.getElementById("nodeCount").textContent = data.nodes ? data.nodes.length : 0;
+        document.getElementById("chainLength").textContent = data.blockchain_length ?? 0;
+        document.getElementById("mempoolSize").textContent = data.mempool_size ?? 0;
+
+        document.getElementById("currentPeers").textContent =
+          data.current_peers && data.current_peers.length
+            ? data.current_peers.join(" | ")
+            : "Aucun peer";
+
+        document.getElementById("relationsList").innerHTML =
+          data.relations && data.relations.length
+            ? data.relations.map(r => `${r.from} ↔ ${r.to}`).join("<br>")
+            : "Aucune relation";
+
+        if (data.database) {
+          document.getElementById("databaseInfo").innerHTML =
+            `${data.database.container}<br>${data.database.engine}<br>${data.database.file}<br>${data.database.volume}`;
+        }
+
+        drawNetwork(data);
+        setStatus("Réseau chargé.");
+      } catch (err) {
+        setStatus("Impossible de charger le réseau. Vérifie que la route /network existe.", true);
+      }
+    }
+
+    function drawNetwork(data) {
+      const area = document.getElementById("networkArea");
+      const svg = document.getElementById("networkSvg");
+
+      const oldNodes = area.querySelectorAll(".node");
+      oldNodes.forEach(node => node.remove());
+
+      svg.innerHTML = "";
+
+      const nodes = data.nodes || [];
+      const relations = data.relations || [];
+
+      const width = area.clientWidth;
+      const height = area.clientHeight;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = Math.min(width, height) * 0.34;
+
+      const positions = {};
+
+      if (nodes.length === 0) {
+        return;
+      }
+
+      nodes.forEach((node, index) => {
+        const angle = (2 * Math.PI * index) / nodes.length - Math.PI / 2;
+
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+
+        positions[node.node_name] = { x, y };
+
+        const dbLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        dbLine.setAttribute("x1", centerX);
+        dbLine.setAttribute("y1", centerY);
+        dbLine.setAttribute("x2", x);
+        dbLine.setAttribute("y2", y);
+        dbLine.setAttribute("class", "db-link");
+
+        svg.appendChild(dbLine);
+
+        const div = document.createElement("div");
+        div.className = "node";
+
+        if (node.node_name === data.current_node) {
+          div.classList.add("current");
+        }
+
+        div.style.left = x + "px";
+        div.style.top = y + "px";
+
+        div.innerHTML = `
+          <div class="node-icon">⚙️</div>
+          <div class="node-name">${node.node_name}</div>
+          <div class="node-address">${node.address}</div>
+        `;
+
+        area.appendChild(div);
+      });
+
+      relations.forEach(relation => {
+        const a = positions[relation.from];
+        const b = positions[relation.to];
+
+        if (!a || !b) return;
+
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", a.x);
+        line.setAttribute("y1", a.y);
+        line.setAttribute("x2", b.x);
+        line.setAttribute("y2", b.y);
+        line.setAttribute("class", "link");
+
+        svg.appendChild(line);
+      });
+    }
+
+    async function mineBlock() {
+      try {
         setStatus("Minage en cours...");
 
         const res = await fetch("/mine");
         const data = await res.json();
 
         setOutput(data);
-        setStatus("Bloc miné avec succès.");
+        setStatus("Bloc miné et envoyé aux peers.");
+        loadNetwork();
       } catch (err) {
         setStatus("Erreur pendant le minage.", true);
-      } finally {
-        miningStatus.style.display = "none";
-        mineButton.disabled = false;
       }
     }
 
@@ -268,10 +617,12 @@
       try {
         const res = await fetch("/sync");
         const data = await res.json();
+
         setOutput(data);
         setStatus("Synchronisation terminée.");
+        loadNetwork();
       } catch (err) {
-        setStatus("Erreur pendant le sync.", true);
+        setStatus("Erreur pendant la synchronisation.", true);
       }
     }
 
@@ -279,6 +630,7 @@
       try {
         const res = await fetch("/chain");
         const data = await res.json();
+
         setOutput(data);
         setStatus("Blockchain chargée.");
       } catch (err) {
@@ -290,10 +642,11 @@
       try {
         const res = await fetch("/transaction");
         const data = await res.json();
+
         setOutput(data);
-        setStatus("Transactions chargées.");
+        setStatus("Mempool chargé.");
       } catch (err) {
-        setStatus("Erreur pendant le chargement des transactions.", true);
+        setStatus("Erreur pendant le chargement du mempool.", true);
       }
     }
 
@@ -303,11 +656,6 @@
         const data = await res.json();
 
         setOutput(data);
-
-        if (!res.ok) {
-          setStatus(data.message || "Erreur pendant la génération des clés.", true);
-          return;
-        }
 
         if (target === "sender") {
           document.getElementById("sender_private_key").value = data.private_key || "";
@@ -319,7 +667,7 @@
           setStatus("Wallet receiver généré.");
         }
       } catch (err) {
-        setStatus("Erreur pendant la génération des clés.", true);
+        setStatus("Erreur pendant la génération du wallet.", true);
       }
     }
 
@@ -330,15 +678,8 @@
       const private_key = document.getElementById("sender_private_key").value.trim();
       const amount = Number(document.getElementById("amount").value);
 
-      if (
-        !sender_address ||
-        !sender_public_key ||
-        !receiver_address ||
-        !private_key ||
-        !Number.isFinite(amount) ||
-        amount <= 0
-      ) {
-        setStatus("Remplis d'abord sender, receiver, amount et la private key.", true);
+      if (!sender_address || !sender_public_key || !receiver_address || !private_key || amount <= 0) {
+        setStatus("Remplis les champs avant de signer.", true);
         return;
       }
 
@@ -362,7 +703,7 @@
 
         if (res.ok) {
           document.getElementById("signature").value = data.signature || "";
-          setStatus("Transaction signée avec succès.");
+          setStatus("Transaction signée.");
         } else {
           setStatus(data.message || "Erreur pendant la signature.", true);
         }
@@ -378,15 +719,8 @@
       const signature = document.getElementById("signature").value.trim();
       const amount = Number(document.getElementById("amount").value);
 
-      if (
-        !sender_address ||
-        !sender_public_key ||
-        !receiver_address ||
-        !signature ||
-        !Number.isFinite(amount) ||
-        amount <= 0
-      ) {
-        setStatus("Remplis tous les champs correctement puis signe la transaction.", true);
+      if (!sender_address || !sender_public_key || !receiver_address || !signature || amount <= 0) {
+        setStatus("Remplis tous les champs puis signe la transaction.", true);
         return;
       }
 
@@ -412,13 +746,17 @@
 
         if (res.ok) {
           setStatus(data.message || "Transaction envoyée.");
+          loadNetwork();
         } else {
           setStatus(data.message || "Transaction refusée.", true);
         }
       } catch (err) {
-        setStatus("Erreur pendant l’envoi de la transaction.", true);
+        setStatus("Erreur pendant l'envoi de la transaction.", true);
       }
     }
+
+    loadNetwork();
+    setInterval(loadNetwork, 5000);
   </script>
 </body>
 </html>

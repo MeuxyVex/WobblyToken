@@ -9,7 +9,7 @@ import time #juste pour faire une pause à la fin du script et pour calculer le 
 import hashlib #permet de faire du hashage pour le minage des blocks
 import json #permet de convertir les blocks en json pour le hashage et l'envoie entre les nodes
 from wallet import mempool, validation, generationkeys, generation_addresse, signature #import des fonctions utilisés de wallet
-
+from network import dataweb
 app = Flask(__name__) #initialise le serveur web
 
 NODE_NAME = os.getenv("NODE_NAME") #recup dans le fichier .yml  le nom du node 
@@ -117,7 +117,7 @@ def create_block(data): #création du block
 
 @app.route("/") #quand on va à l'adresse racine du serveur web du node affiche la page index.html
 def home():
-    return render_template("index.html", node_name = NODE_NAME, peer = get_peers()) #affiche la page index.html qui est dans le dossier templates du node
+    return render_template("index.html", node_name = NODE_NAME, peer = get_peers(), registry_url = REGISTRY_URL) #affiche la page index.html qui est dans le dossier templates du node
 
 
 @app.route("/mine") #mine un block quand on va sur /mine
@@ -170,6 +170,15 @@ def sync():
             pass
 
     return jsonify(blockchain)
+
+# =========================
+# PARTIE NETWORK
+# =========================
+
+@app.route("/network")
+def network():
+    return jsonify(dataweb(NODE_NAME,REGISTRY_URL,blockchain,mempool,get_peers))
+
 
 
 # =========================
