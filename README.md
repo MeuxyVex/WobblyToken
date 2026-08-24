@@ -1,4 +1,4 @@
-# 🪙 WobblyToken 📘 [Fiche Python pour comprendre WobblyToken](FICHE_PYTHON_WOBBLYTOKEN.md)
+** 🪙 WobblyToken ** 📘 [Fiche Python pour comprendre WobblyToken](FICHE_PYTHON_WOBBLYTOKEN.md)
 <p align="center">
   <img src="src/logo1.png" width="150" alt="WobblyToken logo">
 </p>
