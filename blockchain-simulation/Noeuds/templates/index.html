@@ -1,886 +1,138 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WobblyToken Network</title>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tableau de bord local du nœud WobblyToken">
+  <title>WobblyToken · {{ node_name }}</title>
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      color-scheme: dark;
+      --bg:#07110d; --panel:#0d1a14; --panel2:#12231b; --line:rgba(188,230,198,.15);
+      --text:#eff8f0; --muted:#94aa99; --green:#9ee493; --green2:#5fcf73;
+      --gold:#f0c674; --red:#ff8d80; --blue:#8fc7ff; --radius:20px;
+      --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      --mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
     }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Arial, sans-serif;
-      color: #e5e7eb;
-      background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.22), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.18), transparent 35%),
-        #020617;
-    }
-
-    .container {
-      max-width: 1350px;
-      margin: auto;
-      padding: 24px;
-    }
-
-    .hero {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 18px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .title {
-      margin: 0;
-      font-size: 34px;
-      letter-spacing: -1px;
-    }
-
-    .subtitle {
-      margin-top: 8px;
-      color: #94a3b8;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(37, 99, 235, 0.18);
-      border: 1px solid rgba(96, 165, 250, 0.35);
-      color: #bfdbfe;
-      font-weight: bold;
-      margin: 4px;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-bottom: 18px;
-    }
-
-    @media (max-width: 800px) {
-      .stats {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .stat {
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
-    }
-
-    .stat-value {
-      font-size: 30px;
-      font-weight: bold;
-      color: white;
-    }
-
-    .stat-label {
-      color: #94a3b8;
-      font-size: 13px;
-      margin-top: 4px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1.35fr 0.65fr;
-      gap: 18px;
-    }
-
-    @media (max-width: 1050px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .card {
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      border-radius: 22px;
-      padding: 18px;
-      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(10px);
-    }
-
-    .card h2, .card h3 {
-      margin-top: 0;
-    }
-
-    .network-area {
-      position: relative;
-      height: 520px;
-      border-radius: 20px;
-      overflow: hidden;
-      border: 1px solid rgba(148, 163, 184, 0.16);
-      background:
-        linear-gradient(rgba(148, 163, 184, 0.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(148, 163, 184, 0.045) 1px, transparent 1px);
-      background-size: 34px 34px;
-    }
-
-    #networkSvg {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-      pointer-events: none;
-    }
-
-    .link {
-      stroke: rgba(96, 165, 250, 0.75);
-      stroke-width: 3;
-      stroke-linecap: round;
-      stroke-dasharray: 10 8;
-      animation: dash 1.8s linear infinite;
-    }
-
-    .db-link {
-      stroke: rgba(168, 85, 247, 0.45);
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-dasharray: 4 7;
-    }
-
-    @keyframes dash {
-      from {
-        stroke-dashoffset: 0;
-      }
-      to {
-        stroke-dashoffset: -36;
-      }
-    }
-
-    .node {
-      position: absolute;
-      width: 128px;
-      min-height: 88px;
-      transform: translate(-50%, -50%);
-      border-radius: 18px;
-      padding: 12px;
-      text-align: center;
-      background: linear-gradient(135deg, rgba(30, 41, 59, 0.98), rgba(15, 23, 42, 0.98));
-      border: 1px solid rgba(96, 165, 250, 0.45);
-      box-shadow: 0 0 26px rgba(37, 99, 235, 0.22);
-      z-index: 5;
-    }
-
-    .node.current {
-      border-color: #22c55e;
-      box-shadow: 0 0 32px rgba(34, 197, 94, 0.32);
-    }
-
-    .node-icon {
-      font-size: 24px;
-      margin-bottom: 6px;
-    }
-
-    .node-name {
-      font-weight: bold;
-      color: #ffffff;
-    }
-
-    .node-address {
-      margin-top: 4px;
-      font-size: 11px;
-      color: #94a3b8;
-      word-break: break-word;
-    }
-
-    .db-box {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 145px;
-      transform: translate(-50%, -50%);
-      border-radius: 16px;
-      padding: 10px;
-      text-align: center;
-      background: linear-gradient(135deg, rgba(88, 28, 135, 0.92), rgba(30, 64, 175, 0.92));
-      border: 1px solid rgba(216, 180, 254, 0.45);
-      box-shadow: 0 0 22px rgba(168, 85, 247, 0.22);
-      z-index: 4;
-    }
-
-    .db-icon {
-      font-size: 22px;
-      margin-bottom: 4px;
-    }
-
-    .db-title {
-      font-weight: bold;
-      font-size: 14px;
-    }
-
-    .db-sub {
-      color: #ddd6fe;
-      font-size: 9px;
-      margin-top: 4px;
-      line-height: 1.25;
-    }
-
-    .block-packet {
-      position: absolute;
-      width: 22px;
-      height: 22px;
-      border-radius: 7px;
-      background: linear-gradient(135deg, #facc15, #f97316);
-      box-shadow: 0 0 18px rgba(250, 204, 21, 0.8);
-      z-index: 20;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      animation: packetPulse 0.6s infinite alternate;
-    }
-
-    @keyframes packetPulse {
-      from {
-        box-shadow: 0 0 10px rgba(250, 204, 21, 0.55);
-      }
-      to {
-        box-shadow: 0 0 26px rgba(250, 204, 21, 1);
-      }
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 14px 0;
-    }
-
-    button {
-      border: none;
-      border-radius: 12px;
-      padding: 10px 14px;
-      cursor: pointer;
-      color: white;
-      background: #2563eb;
-      font-weight: bold;
-    }
-
-    button:hover {
-      background: #1d4ed8;
-    }
-
-    button.secondary {
-      background: #334155;
-    }
-
-    button.secondary:hover {
-      background: #475569;
-    }
-
-    input, textarea {
-      width: 100%;
-      border: 1px solid #475569;
-      border-radius: 12px;
-      background: #020617;
-      color: white;
-      padding: 10px;
-      margin-top: 6px;
-    }
-
-    textarea {
-      min-height: 82px;
-      resize: vertical;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 12px;
-      color: #cbd5e1;
-      font-size: 14px;
-    }
-
-    pre {
-      background: #020617;
-      border: 1px solid rgba(148, 163, 184, 0.18);
-      border-radius: 16px;
-      padding: 14px;
-      min-height: 170px;
-      max-height: 330px;
-      overflow: auto;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .muted {
-      color: #94a3b8;
-    }
-
-    .success {
-      color: #22c55e;
-      font-weight: bold;
-    }
-
-    .error {
-      color: #ef4444;
-      font-weight: bold;
-    }
-
-    .small-list {
-      display: grid;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .small-item {
-      padding: 10px;
-      border-radius: 14px;
-      background: rgba(2, 6, 23, 0.7);
-      border: 1px solid rgba(148, 163, 184, 0.14);
-      font-size: 13px;
-    }
-
-    .wallet-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 18px;
-    }
-
-    @media (max-width: 900px) {
-      .wallet-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;min-width:320px;min-height:100vh;font-family:var(--sans);color:var(--text);background:radial-gradient(circle at 8% -10%,rgba(95,207,115,.16),transparent 28rem),radial-gradient(circle at 92% 12%,rgba(240,198,116,.1),transparent 24rem),var(--bg)}
+    button,input,textarea{font:inherit}.shell{width:min(1480px,calc(100% - 32px));margin:auto;padding:24px 0 48px}.topbar,.brand,.connection,.actions,.card-head{display:flex;align-items:center}.topbar{justify-content:space-between;gap:20px;margin-bottom:22px}.brand{gap:14px}.mark{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;color:#07110d;background:linear-gradient(145deg,var(--green),var(--green2));font-weight:900}.brand h1{margin:0;font-size:1.5rem;letter-spacing:-.04em}.brand p{margin:3px 0 0;color:var(--muted);font-size:.8rem}
+    .connection{gap:9px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);background:rgba(13,26,20,.75);font-size:.78rem}.dot{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 5px rgba(240,198,116,.1)}.online .dot{background:var(--green2);box-shadow:0 0 0 5px rgba(95,207,115,.12)}.offline .dot{background:var(--red)}
+    .hero{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,.6fr);gap:18px;margin-bottom:18px;padding:clamp(24px,4vw,44px);border:1px solid var(--line);border-radius:28px;background:linear-gradient(120deg,rgba(18,35,27,.98),rgba(8,19,14,.94));box-shadow:0 22px 60px rgba(0,0,0,.28)}.eyebrow{margin:0 0 12px;color:var(--green);font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase}.hero h2{max-width:760px;margin:0;font-size:clamp(2rem,5vw,4.2rem);line-height:1;letter-spacing:-.065em}.hero-copy{max-width:680px;margin:18px 0 0;color:#adc0b1;line-height:1.7}.actions{flex-wrap:wrap;gap:10px;margin-top:22px}
+    .button{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:10px 15px;border:1px solid transparent;border-radius:12px;color:#07110d;background:var(--green);cursor:pointer;font-weight:800;transition:.14s}.button:hover{transform:translateY(-1px);background:#b2eea9}.button:disabled{cursor:wait;opacity:.55;transform:none}.button.secondary{color:var(--text);border-color:var(--line);background:rgba(255,255,255,.045)}.button.secondary:hover{background:rgba(255,255,255,.08)}
+    .wallet-card{display:flex;flex-direction:column;justify-content:space-between;padding:20px;border:1px solid rgba(158,228,147,.22);border-radius:20px;background:rgba(4,12,8,.5)}.label{color:var(--muted);font-size:.72rem;font-weight:750;letter-spacing:.1em;text-transform:uppercase}.balance{margin:16px 0 2px;color:var(--gold);font-size:clamp(2rem,4vw,3.35rem);font-weight:850;letter-spacing:-.055em}.balance small{color:#f9e1ae;font-size:.38em;letter-spacing:.04em}.address-box{margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}.mono{font-family:var(--mono);font-size:.76rem;line-height:1.55;overflow-wrap:anywhere}.muted{color:var(--muted)}
+    .stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:18px}.stat{min-height:116px;padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(13,26,20,.84)}.stat .name{color:var(--muted);font-size:.7rem;font-weight:750;letter-spacing:.09em;text-transform:uppercase}.stat .value{margin-top:15px;font-size:clamp(1.6rem,3vw,2.3rem);font-weight:850;letter-spacing:-.05em}.stat .note{margin-top:4px;color:var(--muted);font-size:.74rem}
+    .layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,.65fr);gap:18px;align-items:start}.stack{display:grid;gap:18px}.card{overflow:hidden;border:1px solid var(--line);border-radius:var(--radius);background:rgba(13,26,20,.9);box-shadow:0 12px 34px rgba(0,0,0,.16)}.card-head{align-items:flex-start;justify-content:space-between;gap:18px;padding:20px 22px;border-bottom:1px solid var(--line)}.card-head h3{margin:0;font-size:1.05rem}.card-head p{margin:6px 0 0;color:var(--muted);font-size:.78rem}.card-body{padding:20px 22px}.pill{min-width:34px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;color:var(--green);background:rgba(158,228,147,.07);text-align:center;font-size:.75rem;font-weight:800}
+    .table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:.8rem}th{padding:0 12px 12px;color:var(--muted);font-size:.66rem;letter-spacing:.08em;text-align:left;text-transform:uppercase;white-space:nowrap}td{padding:14px 12px;border-top:1px solid var(--line);vertical-align:middle}td:first-child,th:first-child{padding-left:0}td:last-child,th:last-child{padding-right:0;text-align:right}.amount{color:var(--gold);font-weight:800;white-space:nowrap}.mine-tag{color:var(--green);font-size:.66rem;font-weight:800;text-transform:uppercase}.empty{padding:26px 12px;color:var(--muted);text-align:center;line-height:1.6}
+    .list{display:grid;gap:10px}.row{display:grid;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}.block-row{grid-template-columns:72px minmax(0,1fr) auto;align-items:center}.height{display:grid;place-items:center;min-height:54px;border-radius:12px;color:#07110d;background:var(--gold);font-weight:900}.meta{display:flex;flex-wrap:wrap;gap:8px 15px;margin-top:6px;color:var(--muted);font-size:.7rem}.network-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.node{display:block;min-height:125px;padding:15px;border:1px solid var(--line);border-radius:15px;color:var(--text);background:rgba(255,255,255,.025);text-decoration:none;cursor:pointer;transition:.15s}.node:hover{border-color:rgba(158,228,147,.42);background:rgba(158,228,147,.07);transform:translateY(-2px)}.node.current{border-color:rgba(158,228,147,.52);background:rgba(158,228,147,.065)}.node-name{font-weight:850}.node-address{margin-top:10px;color:var(--muted);font-family:var(--mono);font-size:.67rem;overflow-wrap:anywhere}.node-action{margin-top:15px;color:var(--green);font-size:.72rem;font-weight:800}.node.current .node-action{color:var(--muted)}.relations{margin-top:14px;color:var(--muted);font-size:.74rem;line-height:1.7}
+    textarea,input{width:100%;border:1px solid rgba(188,230,198,.25);border-radius:12px;outline:none;color:var(--text);background:#07100c}textarea:focus,input:focus{border-color:rgba(158,228,147,.58);box-shadow:0 0 0 3px rgba(158,228,147,.08)}textarea{min-height:280px;padding:14px;resize:vertical;font-family:var(--mono);font-size:.73rem;line-height:1.55}input{min-height:46px;padding:10px 12px}label{display:block;margin-bottom:8px;color:var(--muted);font-size:.74rem;font-weight:700}.hint{margin:12px 0 0;color:var(--muted);font-size:.72rem;line-height:1.55}.endpoint{padding:2px 6px;border:1px solid var(--line);border-radius:6px;color:var(--blue);background:rgba(143,199,255,.07);font-family:var(--mono);font-size:.67rem}.form-field+.form-field{margin-top:16px}.send-summary{display:flex;justify-content:space-between;gap:14px;margin-top:16px;padding:13px 14px;border:1px solid var(--line);border-radius:12px;color:var(--muted);background:rgba(255,255,255,.025);font-size:.75rem}.send-summary strong{color:var(--gold)}
+    details{border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.02)}summary{padding:14px;cursor:pointer;color:var(--muted);font-size:.78rem;font-weight:750}.details-body{padding:0 14px 14px}.key-grid{display:grid;gap:10px}.key-output{min-height:72px;padding:10px;font-size:.66rem}.console{min-height:190px;max-height:410px;margin:0;overflow:auto;padding:15px;border:1px solid var(--line);border-radius:14px;color:#c6d8c9;background:#050b08;font-family:var(--mono);font-size:.7rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+    .toast{position:fixed;right:18px;bottom:18px;z-index:50;max-width:min(420px,calc(100vw - 36px));padding:13px 16px;border:1px solid rgba(158,228,147,.34);border-radius:13px;color:#eaffeb;background:rgba(15,35,23,.97);box-shadow:0 22px 60px rgba(0,0,0,.3);opacity:0;transform:translateY(12px);pointer-events:none;transition:.18s;font-size:.8rem}.toast.visible{opacity:1;transform:translateY(0)}.toast.error{border-color:rgba(255,141,128,.45);color:#ffecea;background:rgba(54,20,18,.97)}.loading{opacity:.58;pointer-events:none}
+    @media(max-width:1080px){.hero,.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.shell{width:calc(100% - 20px);padding-top:14px}.connection{max-width:45%}.stats{grid-template-columns:repeat(2,1fr)}.hero{padding:24px 20px;border-radius:22px}.card-head,.card-body{padding-left:16px;padding-right:16px}.block-row{grid-template-columns:58px minmax(0,1fr)}.block-row>:last-child{grid-column:2;justify-self:start}}@media(max-width:460px){.brand p,.connection{display:none}.hero-actions .button{flex:1 1 130px}}
   </style>
 </head>
-
 <body>
-  <div class="container">
-    <div class="hero">
+  <main class="shell" id="dashboard">
+    <header class="topbar">
+      <div class="brand"><div class="mark">WT</div><div><h1>WobblyToken</h1><p>Explorateur local · {{ node_name }}</p></div></div>
+      <div class="connection" id="connection"><span class="dot"></span><span id="connectionText">Connexion…</span></div>
+    </header>
+
+    <section class="hero">
       <div>
-        <h1 class="title">WobblyToken Network</h1>
-        <p class="subtitle">
-          Visualisation du réseau WobblyToken, des nodes et de la registry SQLite.
-        </p>
+        <p class="eyebrow">Nœud actif · {{ node_name }}</p>
+        <h2>Observe chaque WBL, du bloc jusqu’à l’UTXO.</h2>
+        <p class="hero-copy">Mine, synchronise et inspecte l’état réel de ton nœud. Ce tableau de bord lit directement les endpoints Flask de WobblyToken.</p>
+        <div class="actions"><button class="button" id="mine">Miner un bloc</button><button class="button secondary" id="sync">Synchroniser</button><button class="button secondary" id="refresh">Rafraîchir</button></div>
+      </div>
+      <aside class="wallet-card">
+        <div><div class="label">Solde du wallet mineur</div><div class="balance"><span id="balance">0</span> <small>WBL</small></div><div class="muted" id="balanceUnits">0 unités</div></div>
+        <div class="address-box"><div class="label">Adresse</div><div class="mono" id="walletAddress">Chargement…</div><div class="actions"><button class="button secondary" id="copyAddress">Copier l’adresse</button></div></div>
+      </aside>
+    </section>
+
+    <section class="stats">
+      <article class="stat"><div class="name">Hauteur</div><div class="value" id="height">—</div><div class="note" id="blockNote">0 bloc</div></article>
+      <article class="stat"><div class="name">UTXO</div><div class="value" id="utxoCount">0</div><div class="note">sorties disponibles</div></article>
+      <article class="stat"><div class="name">Mempool</div><div class="value" id="mempoolCount">0</div><div class="note">transactions en attente</div></article>
+      <article class="stat"><div class="name">Nœuds</div><div class="value" id="nodeCount">0</div><div class="note" id="peerNote">0 pair direct</div></article>
+      <article class="stat"><div class="name">Difficulté</div><div class="value" id="difficulty">—</div><div class="note">dernier bloc</div></article>
+    </section>
+
+    <div class="layout">
+      <div class="stack">
+        <section class="card">
+          <div class="card-head"><div><h3>Ensemble UTXO</h3><p>Chaque sortie non dépensée, identifiée par txid:index.</p></div><span class="pill" id="utxoBadge">0</span></div>
+          <div class="card-body table-wrap"><table><thead><tr><th>Référence</th><th>Propriétaire</th><th>Montant</th></tr></thead><tbody id="utxoTable"><tr><td colspan="3" class="empty">Chargement…</td></tr></tbody></table></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><div><h3>Blockchain locale</h3><p>Les huit blocs les plus récents, coinbase comprise.</p></div><span class="pill" id="chainBadge">0</span></div>
+          <div class="card-body"><div class="list" id="blocks"><div class="empty">Aucun bloc miné.</div></div></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><div><h3>Changer de nœud</h3><p>Clique sur un nœud pour ouvrir son tableau de bord.</p></div><span class="pill" id="networkBadge">0</span></div>
+          <div class="card-body"><div class="network-grid" id="network"><div class="empty">Chargement…</div></div><div class="relations" id="relations"></div></div>
+        </section>
       </div>
 
-      <div>
-        <span class="badge">Node actuel : {{ node_name }}</span>
-        <span class="badge">Registry : {{ registry_url }}</span>
-      </div>
+      <aside class="stack">
+        <section class="card">
+          <div class="card-head"><div><h3>Mempool</h3><p>Transactions validées, pas encore minées.</p></div><span class="pill" id="mempoolBadge">0</span></div>
+          <div class="card-body"><div class="list" id="mempool"><div class="empty">La mempool est vide.</div></div></div>
+        </section>
+        <section class="card">
+          <div class="card-head"><div><h3>Envoyer des WBL</h3><p>Le nœud choisit les UTXO, rend la monnaie et signe automatiquement.</p></div><span class="pill">1 → 2 → 3</span></div>
+          <div class="card-body">
+            <div class="form-field"><label for="sendAddress">1. Adresse du destinataire</label><input id="sendAddress" type="text" autocomplete="off" spellcheck="false" placeholder="wbl_..."></div>
+            <div class="form-field"><label for="sendAmount">2. Montant en WBL</label><input id="sendAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="Exemple : 2,5"></div>
+            <div class="send-summary"><span>Disponible pour un nouvel envoi</span><strong id="spendableBalance">0 WBL</strong></div>
+            <p class="hint">Ta clé privée reste dans le fichier sécurisé du nœud et n’est jamais affichée dans cette page.</p>
+            <div class="actions"><button class="button" id="sendTransaction">3. Envoyer</button><button class="button secondary" id="sendMax">Tout envoyer</button></div>
+          </div>
+        </section>
+        <section class="card">
+          <div class="card-head"><div><h3>Dernière réponse API</h3><p id="consoleEndpoint">Aucune requête.</p></div></div>
+          <div class="card-body"><pre class="console" id="console">Le tableau de bord est prêt.</pre></div>
+        </section>
+      </aside>
     </div>
-
-    <div class="stats">
-      <div class="stat">
-        <div class="stat-value" id="nodeCount">0</div>
-        <div class="stat-label">Nodes enregistrés</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-value" id="chainLength">0</div>
-        <div class="stat-label">Blocs locaux</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-value" id="mempoolSize">0</div>
-        <div class="stat-label">Transactions en attente</div>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <h2>Réseau WobblyToken</h2>
-
-        <div class="network-area" id="networkArea">
-          <svg id="networkSvg"></svg>
-
-          <div class="db-box" id="dbBox">
-            <div class="db-icon">🗄️</div>
-            <div class="db-title">Registry</div>
-            <div class="db-sub">
-              SQLite<br>
-              registry-data
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button onclick="loadNetwork()">Rafraîchir le réseau</button>
-          <button onclick="mineBlock()">Miner un bloc</button>
-          <button class="secondary" onclick="syncChain()">Synchroniser</button>
-          <button class="secondary" onclick="showChain()">Voir blockchain</button>
-        </div>
-
-        <p id="status" class="muted">Interface prête.</p>
-      </div>
-
-      <div class="card">
-        <h2>Détails réseau</h2>
-
-        <div class="small-list">
-          <div class="small-item">
-            <strong>Peers du node actuel</strong>
-            <div id="currentPeers" class="muted">Chargement...</div>
-          </div>
-
-          <div class="small-item">
-            <strong>Relations entre nodes</strong>
-            <div id="relationsList" class="muted">Chargement...</div>
-          </div>
-
-          <div class="small-item">
-            <strong>Registry / SQLite</strong>
-            <div id="databaseInfo" class="muted">Chargement...</div>
-          </div>
-        </div>
-
-        <h3 style="margin-top: 18px;">Résultat</h3>
-        <pre id="output">Clique sur une action...</pre>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top: 18px;">
-      <h2>Transactions et wallets</h2>
-
-      <div class="wallet-grid">
-        <div>
-          <h3>Sender</h3>
-
-          <div class="actions">
-            <button onclick="generateWallet('sender')">Générer wallet sender</button>
-          </div>
-
-          <label>
-            Sender private key
-            <textarea id="sender_private_key"></textarea>
-          </label>
-
-          <label>
-            Sender public key
-            <textarea id="sender_public_key"></textarea>
-          </label>
-
-          <label>
-            Sender address
-            <input type="text" id="sender_address">
-          </label>
-        </div>
-
-        <div>
-          <h3>Receiver</h3>
-
-          <div class="actions">
-            <button onclick="generateWallet('receiver')">Générer wallet receiver</button>
-          </div>
-
-          <label>
-            Receiver address
-            <input type="text" id="receiver_address">
-          </label>
-
-          <label>
-            Amount
-            <input type="number" id="amount" placeholder="10" step="any" min="0">
-          </label>
-
-          <label>
-            Signature
-            <textarea id="signature"></textarea>
-          </label>
-
-          <div class="actions">
-            <button onclick="signTransaction()">Signer</button>
-            <button onclick="sendTransaction()">Envoyer transaction</button>
-            <button class="secondary" onclick="showTransactions()">Voir mempool</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    const output = document.getElementById("output");
-    const statusEl = document.getElementById("status");
-
-    let lastNodePositions = {};
-    let lastNetworkData = null;
-
-    function setOutput(data) {
-      output.textContent =
-        typeof data === "string" ? data : JSON.stringify(data, null, 2);
-    }
-
-    function setStatus(message, isError = false) {
-      statusEl.textContent = message;
-      statusEl.className = isError ? "error" : "success";
-    }
-
-    async function loadNetwork() {
-      try {
-        const res = await fetch("/network");
-        const data = await res.json();
-
-        setOutput(data);
-
-        document.getElementById("nodeCount").textContent = data.nodes ? data.nodes.length : 0;
-        document.getElementById("chainLength").textContent = data.blockchain_length ?? 0;
-        document.getElementById("mempoolSize").textContent = data.mempool_size ?? 0;
-
-        document.getElementById("currentPeers").textContent =
-          data.current_peers && data.current_peers.length
-            ? data.current_peers.join(" | ")
-            : "Aucun peer";
-
-        document.getElementById("relationsList").innerHTML =
-          data.relations && data.relations.length
-            ? data.relations.map(r => `${r.from} ↔ ${r.to}`).join("<br>")
-            : "Aucune relation";
-
-        if (data.database) {
-          document.getElementById("databaseInfo").innerHTML =
-            `${data.database.container}<br>${data.database.engine}<br>${data.database.file}<br>${data.database.volume}`;
-        }
-
-        drawNetwork(data);
-        setStatus("Réseau chargé.");
-      } catch (err) {
-        setStatus("Impossible de charger le réseau. Vérifie que la route /network existe.", true);
-      }
-    }
-
-    function drawNetwork(data) {
-      const area = document.getElementById("networkArea");
-      const svg = document.getElementById("networkSvg");
-
-      const oldNodes = area.querySelectorAll(".node");
-      oldNodes.forEach(node => node.remove());
-
-      const oldPackets = area.querySelectorAll(".block-packet");
-      oldPackets.forEach(packet => packet.remove());
-
-      svg.innerHTML = "";
-
-      const nodes = data.nodes || [];
-      const relations = data.relations || [];
-
-      const width = area.clientWidth;
-      const height = area.clientHeight;
-      const centerX = width / 2;
-      const centerY = height / 2;
-      const radius = Math.min(width, height) * 0.34;
-
-      const positions = {};
-
-      if (nodes.length === 0) {
-        lastNodePositions = {};
-        lastNetworkData = data;
-        return;
-      }
-
-      nodes.forEach((node, index) => {
-        const angle = (2 * Math.PI * index) / nodes.length - Math.PI / 2;
-
-        const x = centerX + Math.cos(angle) * radius;
-        const y = centerY + Math.sin(angle) * radius;
-
-        positions[node.node_name] = { x, y };
-
-        const dbLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        dbLine.setAttribute("x1", centerX);
-        dbLine.setAttribute("y1", centerY);
-        dbLine.setAttribute("x2", x);
-        dbLine.setAttribute("y2", y);
-        dbLine.setAttribute("class", "db-link");
-
-        svg.appendChild(dbLine);
-
-        const div = document.createElement("div");
-        div.className = "node";
-
-        if (node.node_name === data.current_node) {
-          div.classList.add("current");
-        }
-
-        div.style.left = x + "px";
-        div.style.top = y + "px";
-
-        div.innerHTML = `
-          <div class="node-icon">⚙️</div>
-          <div class="node-name">${node.node_name}</div>
-          <div class="node-address">${node.address}</div>
-        `;
-
-        area.appendChild(div);
-      });
-
-      relations.forEach(relation => {
-        const a = positions[relation.from];
-        const b = positions[relation.to];
-
-        if (!a || !b) return;
-
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", a.x);
-        line.setAttribute("y1", a.y);
-        line.setAttribute("x2", b.x);
-        line.setAttribute("y2", b.y);
-        line.setAttribute("class", "link");
-
-        svg.appendChild(line);
-      });
-
-      lastNodePositions = positions;
-      lastNetworkData = data;
-    }
-
-    function animatePacket(fromName, toName, delay = 0) {
-      const area = document.getElementById("networkArea");
-
-      const from = lastNodePositions[fromName];
-      const to = lastNodePositions[toName];
-
-      if (!from || !to) {
-        return;
-      }
-
-      setTimeout(() => {
-        const packet = document.createElement("div");
-        packet.className = "block-packet";
-        packet.textContent = "⬡";
-
-        packet.style.left = from.x + "px";
-        packet.style.top = from.y + "px";
-
-        area.appendChild(packet);
-
-        packet.animate(
-          [
-            {
-              left: from.x + "px",
-              top: from.y + "px",
-              opacity: 1,
-              transform: "translate(-50%, -50%) scale(1)"
-            },
-            {
-              left: to.x + "px",
-              top: to.y + "px",
-              opacity: 1,
-              transform: "translate(-50%, -50%) scale(1.25)"
-            }
-          ],
-          {
-            duration: 900,
-            easing: "ease-in-out",
-            fill: "forwards"
-          }
-        );
-
-        setTimeout(() => {
-          packet.remove();
-        }, 950);
-      }, delay);
-    }
-
-    function animateBlockPropagation(data) {
-      const currentNode = data.current_node;
-      const relations = data.relations || [];
-
-      let delay = 0;
-
-      relations.forEach(relation => {
-        if (relation.from === currentNode) {
-          animatePacket(relation.from, relation.to, delay);
-          delay += 120;
-        }
-
-        if (relation.to === currentNode) {
-          animatePacket(relation.to, relation.from, delay);
-          delay += 120;
-        }
-      });
-
-      if (delay === 0) {
-        setStatus("Bloc miné, mais aucun peer n'a été trouvé pour l'animation.", true);
-      }
-    }
-
-    async function mineBlock() {
-      try {
-        setStatus("Minage en cours...");
-
-        const networkRes = await fetch("/network");
-        const networkData = await networkRes.json();
-
-        drawNetwork(networkData);
-
-        const res = await fetch("/mine");
-        const data = await res.json();
-
-        setOutput(data);
-        setStatus("Bloc miné. Propagation visuelle en cours...");
-
-        animateBlockPropagation(networkData);
-
-        setTimeout(() => {
-          loadNetwork();
-          setStatus("Bloc propagé aux peers.");
-        }, 1300);
-
-      } catch (err) {
-        setStatus("Erreur pendant le minage.", true);
-      }
-    }
-
-    async function syncChain() {
-      try {
-        const res = await fetch("/sync");
-        const data = await res.json();
-
-        setOutput(data);
-        setStatus("Synchronisation terminée.");
-        loadNetwork();
-      } catch (err) {
-        setStatus("Erreur pendant la synchronisation.", true);
-      }
-    }
-
-    async function showChain() {
-      try {
-        const res = await fetch("/chain");
-        const data = await res.json();
-
-        setOutput(data);
-        setStatus("Blockchain chargée.");
-      } catch (err) {
-        setStatus("Erreur pendant le chargement de la blockchain.", true);
-      }
-    }
-
-    async function showTransactions() {
-      try {
-        const res = await fetch("/transaction");
-        const data = await res.json();
-
-        setOutput(data);
-        setStatus("Mempool chargé.");
-      } catch (err) {
-        setStatus("Erreur pendant le chargement du mempool.", true);
-      }
-    }
-
-    async function generateWallet(target) {
-      try {
-        const res = await fetch("/generate_keys");
-        const data = await res.json();
-
-        setOutput(data);
-
-        if (target === "sender") {
-          document.getElementById("sender_private_key").value = data.private_key || "";
-          document.getElementById("sender_public_key").value = data.public_key || "";
-          document.getElementById("sender_address").value = data.address || "";
-          setStatus("Wallet sender généré.");
-        } else {
-          document.getElementById("receiver_address").value = data.address || "";
-          setStatus("Wallet receiver généré.");
-        }
-      } catch (err) {
-        setStatus("Erreur pendant la génération du wallet.", true);
-      }
-    }
-
-    async function signTransaction() {
-      const sender_address = document.getElementById("sender_address").value.trim();
-      const sender_public_key = document.getElementById("sender_public_key").value.trim();
-      const receiver_address = document.getElementById("receiver_address").value.trim();
-      const private_key = document.getElementById("sender_private_key").value.trim();
-      const amount = Number(document.getElementById("amount").value);
-
-      if (!sender_address || !sender_public_key || !receiver_address || !private_key || amount <= 0) {
-        setStatus("Remplis les champs avant de signer.", true);
-        return;
-      }
-
-      try {
-        const res = await fetch("/sign_transaction", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            sender_address,
-            sender_public_key,
-            receiver_address,
-            amount,
-            private_key
-          })
-        });
-
-        const data = await res.json();
-        setOutput(data);
-
-        if (res.ok) {
-          document.getElementById("signature").value = data.signature || "";
-          setStatus("Transaction signée.");
-        } else {
-          setStatus(data.message || "Erreur pendant la signature.", true);
-        }
-      } catch (err) {
-        setStatus("Erreur pendant la signature.", true);
-      }
-    }
-
-    async function sendTransaction() {
-      const sender_address = document.getElementById("sender_address").value.trim();
-      const sender_public_key = document.getElementById("sender_public_key").value.trim();
-      const receiver_address = document.getElementById("receiver_address").value.trim();
-      const signature = document.getElementById("signature").value.trim();
-      const amount = Number(document.getElementById("amount").value);
-
-      if (!sender_address || !sender_public_key || !receiver_address || !signature || amount <= 0) {
-        setStatus("Remplis tous les champs puis signe la transaction.", true);
-        return;
-      }
-
-      const tx = {
-        sender_address,
-        sender_public_key,
-        receiver_address,
-        amount,
-        signature
-      };
-
-      try {
-        const res = await fetch("/transaction", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(tx)
-        });
-
-        const data = await res.json();
-        setOutput(data);
-
-        if (res.ok) {
-          setStatus(data.message || "Transaction envoyée.");
-          loadNetwork();
-        } else {
-          setStatus(data.message || "Transaction refusée.", true);
-        }
-      } catch (err) {
-        setStatus("Erreur pendant l'envoi de la transaction.", true);
-      }
-    }
-
-    loadNetwork();
-    setInterval(loadNetwork, 5000);
+    const COIN=100_000_000;
+    const state={network:{},wallet:{},chain:[],utxos:{},mempool:[],balance:0,busy:false};
+    const el=id=>document.getElementById(id);
+    const esc=value=>String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    const short=(value,a=11,b=8)=>{const text=String(value??"");return text.length>a+b+1?`${text.slice(0,a)}…${text.slice(-b)}`:text};
+    const integer=value=>new Intl.NumberFormat("fr-FR",{maximumFractionDigits:0}).format(Number(value||0));
+    const wbl=units=>new Intl.NumberFormat("fr-FR",{maximumFractionDigits:8}).format(Number(units||0)/COIN);
+    const plural=(n,one,many)=>`${n} ${n===1?one:many}`;
+
+    function toast(message,error=false){const node=el("toast");node.textContent=message;node.className=`toast visible${error?" error":""}`;clearTimeout(toast.timer);toast.timer=setTimeout(()=>node.className="toast",3300)}
+    function connection(mode,text){el("connection").className=`connection ${mode}`;el("connectionText").textContent=text}
+    function busy(value){state.busy=value;el("dashboard").classList.toggle("loading",value);for(const id of ["mine","sync","refresh"])el(id).disabled=value}
+    async function api(path,options={}){const response=await fetch(path,options);const type=response.headers.get("content-type")||"";const data=type.includes("application/json")?await response.json():await response.text();el("consoleEndpoint").textContent=`${options.method||"GET"} ${path} · HTTP ${response.status}`;el("console").textContent=typeof data==="string"?data:JSON.stringify(data,null,2);if(!response.ok)throw new Error(data?.message||`Erreur HTTP ${response.status}`);return data}
+
+    function parseWbl(value){const normalized=String(value).trim().replace(",",".");if(!/^\d+(\.\d{1,8})?$/.test(normalized))throw new Error("Entre un montant positif avec au maximum 8 décimales.");const [whole,decimal=""]=normalized.split(".");const units=Number(whole)*COIN+Number(decimal.padEnd(8,"0"));if(!Number.isSafeInteger(units)||units<=0)throw new Error("Le montant est invalide ou trop grand.");return units}
+    function inputWbl(units){const whole=Math.floor(units/COIN),decimal=String(units%COIN).padStart(8,"0").replace(/0+$/,"");return decimal?`${whole}.${decimal}`:String(whole)}
+    function spendableBalance(){const reserved=new Set();for(const tx of state.mempool)for(const input of tx.inputs||[])reserved.add(`${input.txid}:${input.output_index}`);let total=0;for(const [reference,output] of Object.entries(state.utxos))if(output.address===state.wallet.address&&!reserved.has(reference))total+=Number(output.amount||0);return total}
+
+    function renderStats(){const length=state.chain.length,peers=state.network.current_peers||[],nodes=state.network.nodes||[],last=length?state.chain[length-1]:null;el("height").textContent=length?length-1:"—";el("blockNote").textContent=plural(length,"bloc","blocs");el("utxoCount").textContent=Object.keys(state.utxos).length;el("mempoolCount").textContent=state.mempool.length;el("nodeCount").textContent=nodes.length;el("peerNote").textContent=plural(peers.length,"pair direct","pairs directs");el("difficulty").textContent=last?last.difficulty:"—";el("utxoBadge").textContent=Object.keys(state.utxos).length;el("chainBadge").textContent=length;el("mempoolBadge").textContent=state.mempool.length;el("networkBadge").textContent=nodes.length}
+    function renderWallet(balance){state.balance=balance;el("walletAddress").textContent=state.wallet.address||"Indisponible";el("balance").textContent=wbl(balance);el("balanceUnits").textContent=`${integer(balance)} unités confirmées`;el("spendableBalance").textContent=`${wbl(spendableBalance())} WBL`}
+    function renderUtxos(){const entries=Object.entries(state.utxos),body=el("utxoTable"),mine=state.wallet.address;if(!entries.length){body.innerHTML='<tr><td colspan="3" class="empty">Aucun UTXO. Mine un bloc pour créer une coinbase.</td></tr>';return}entries.sort((a,b)=>a[0].localeCompare(b[0]));body.innerHTML=entries.map(([ref,out])=>`<tr><td class="mono" title="${esc(ref)}">${esc(short(ref,13,8))}</td><td><div class="mono" title="${esc(out.address)}">${esc(short(out.address,12,8))}</div>${out.address===mine?'<div class="mine-tag">Wallet de ce nœud</div>':''}</td><td class="amount">${esc(wbl(out.amount))} WBL</td></tr>`).join("")}
+    function renderChain(){const node=el("blocks");if(!state.chain.length){node.innerHTML='<div class="empty">Aucun bloc local. Le premier minage créera une coinbase.</div>';return}node.innerHTML=[...state.chain].reverse().slice(0,8).map(block=>{const txs=block.transactions||[],coinbase=txs[0]||{},reward=coinbase.outputs?.[0]?.amount||0;return `<article class="row block-row"><div class="height">#${esc(block.index)}</div><div><div class="mono" title="${esc(block.hash)}">${esc(short(block.hash,17,10))}</div><div class="meta"><span>${esc(plural(txs.length,"transaction","transactions"))}</span><span>difficulté ${esc(block.difficulty)}</span><span>nonce ${esc(integer(block.nonce))}</span></div></div><div class="amount">+${esc(wbl(reward))} WBL</div></article>`}).join("")}
+    function renderMempool(){const node=el("mempool");if(!state.mempool.length){node.innerHTML='<div class="empty">La mempool est vide.</div>';return}node.innerHTML=state.mempool.map(tx=>{const total=(tx.outputs||[]).reduce((sum,out)=>sum+Number(out.amount||0),0);return `<article class="row"><div class="mono" title="${esc(tx.txid)}">${esc(short(tx.txid,14,9))}</div><div class="meta"><span>${esc(plural((tx.inputs||[]).length,"input","inputs"))}</span><span>${esc(plural((tx.outputs||[]).length,"output","outputs"))}</span><span class="amount">${esc(wbl(total))} WBL en sortie</span></div></article>`}).join("")}
+    function nodeBrowserUrl(nodeName){const match=/^node(\d+)$/.exec(String(nodeName).toLowerCase());if(!match)return null;const port=5000+Number(match[1]);return `${location.protocol}//${location.hostname}:${port}/`}
+    function renderNetwork(){const nodes=state.network.nodes||[],current=state.network.current_node;el("network").innerHTML=nodes.length?nodes.map(node=>{const isCurrent=node.node_name===current,url=nodeBrowserUrl(node.node_name);if(!url)return `<div class="node"><div class="node-name">${esc(node.node_name)}</div><div class="node-address">${esc(node.address)}</div><div class="node-action">URL publique inconnue</div></div>`;return `<a class="node${isCurrent?" current":""}" href="${esc(url)}"${isCurrent?' aria-current="page"':''}><div class="node-name">${esc(node.node_name)} ${isCurrent?'<span class="mine-tag">actuel</span>':''}</div><div class="node-address">${esc(url)}</div><div class="node-action">${isCurrent?"Vous êtes ici":"Ouvrir ce nœud →"}</div></a>`}).join(""):'<div class="empty">Aucun nœud retourné par la registry.</div>';const seen=new Set(),relations=[];for(const relation of state.network.relations||[]){const from=relation.from||relation.source,to=relation.to||relation.target;if(!from||!to)continue;const key=[from,to].sort().join("::");if(seen.has(key))continue;seen.add(key);relations.push(`${from} ↔ ${to}`)}el("relations").textContent=relations.length?`Relations : ${relations.join(" · ")}`:"Aucune relation enregistrée."}
+
+    async function refresh({quiet=false}={}){if(state.busy)return;if(!quiet)busy(true);try{const [network,wallet,chain,utxos,mempool]=await Promise.all([api("/network"),api("/wallet"),api("/chain"),api("/utxos"),api("/transaction")]);state.network=network;state.wallet=wallet;state.chain=Array.isArray(chain)?chain:[];state.utxos=utxos&&typeof utxos==="object"?utxos:{};state.mempool=Array.isArray(mempool)?mempool:[];const balanceData=wallet.address?await api(`/balance/${encodeURIComponent(wallet.address)}`):{balance:0};renderWallet(balanceData.balance||0);renderStats();renderUtxos();renderChain();renderMempool();renderNetwork();connection("online","{{ node_name }} connecté");if(!quiet)toast("Données actualisées.")}catch(error){connection("offline","Nœud indisponible");if(!quiet)toast(error.message||"Actualisation impossible.",true)}finally{if(!quiet)busy(false)}}
+    async function mine(){if(state.busy)return;busy(true);connection("","Minage en cours…");try{const block=await api("/mine");toast(`Bloc #${block.index} miné avec ${block.transactions.length} transaction(s).`)}catch(error){toast(error.message||"Minage impossible.",true)}finally{busy(false);await refresh({quiet:true})}}
+    async function sync(){if(state.busy)return;busy(true);connection("","Synchronisation…");try{const chain=await api("/sync");toast(`Synchronisation terminée : ${chain.length} bloc(s).`)}catch(error){toast(error.message||"Synchronisation impossible.",true)}finally{busy(false);await refresh({quiet:true})}}
+    async function sendTransaction(){const address=el("sendAddress").value.trim();let amount;if(!address){toast("Entre l’adresse du destinataire.",true);el("sendAddress").focus();return}try{amount=parseWbl(el("sendAmount").value)}catch(error){toast(error.message,true);el("sendAmount").focus();return}if(amount>spendableBalance()){toast("Le montant dépasse ton solde disponible.",true);return}el("sendTransaction").disabled=true;try{const result=await api("/send",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({address,amount})});el("sendAddress").value="";el("sendAmount").value="";toast(result.message||"Transaction envoyée.");await refresh({quiet:true})}catch(error){toast(error.message||"Transaction refusée.",true)}finally{el("sendTransaction").disabled=false}}
+    async function copyAddress(){if(!state.wallet.address)return;try{await navigator.clipboard.writeText(state.wallet.address);toast("Adresse copiée.")}catch{toast("Copie automatique indisponible.",true)}}
+
+    el("mine").addEventListener("click",mine);el("sync").addEventListener("click",sync);el("refresh").addEventListener("click",()=>refresh());el("copyAddress").addEventListener("click",copyAddress);el("sendTransaction").addEventListener("click",sendTransaction);el("sendMax").addEventListener("click",()=>{const available=spendableBalance();if(!available){toast("Aucun WBL disponible.",true);return}el("sendAmount").value=inputWbl(available)});
+    refresh();setInterval(()=>refresh({quiet:true}),8000);
   </script>
 </body>
 </html>
