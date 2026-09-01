@@ -1,0 +1,9 @@
+[package]
+name = "wobbly-pow-multicore"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sha2 = "0.10"
+rayon = "1.8"
+num_cpus = "1.16"

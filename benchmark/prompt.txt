@@ -1,0 +1,41 @@
+##Prompt pour benchmark_rust+wgsl
+
+Crée un programme Rust complet de Proof-of-Work (PoW) GPU pour le payload "WobblyToken-PoW-v2" avec les spécifications exactes suivantes :
+
+- Algorithme : SHA-256 complet (pas simplifié)
+- payload : "WobblyToken-PoW-v2-data!" (24 octets exactement)
+- Format du message : [24 octets du préfixe] + [1 octet de difficulté] + [4 octets du nonce en big-endian]
+- Longueur totale du message : 29 octets (232 bits)
+- Le padding SHA-256 doit être : 0x80 suivi de zéros, avec la longueur 232 en bits dans le dernier mot
+- Utiliser wgpu version 22
+- Workgroup size : 256 threads
+- Batch GPU : 256 * 65_535 = 16_776_960 nonces par dispatch
+- Les constantes SHA-256 K doivent être dans une variable `var<private>` (pas `const`) pour permettre l'indexation dynamique. (Indexation dynamique ne marche pas avec les constantes)
+- Difficulté : 6 (paramétrable de 1 à 8)
+- Le nonce est un u32 complet (0 à 4_294_967_295)
+- Le nonce attendu pour difficulté 6 est : 36_182_651
+
+
+Code WGSL (src/shader.wgsl)
+Le shader doit :
+
+Implémenter SHA-256 
+Calculer le hash et vérifier la difficulté
+Retourner dans les buffers les résultats
+
+Code Rust (src/main.rs)
+Le programme doit :
+
+Initialiser wgpu
+Créer les buffers GPU nécessaires (résultat, lecture)
+Implémenter la boucle de minage 
+Mesurer le temps d'exécution précis
+Afficher : nonce trouvé, nombre de hashes calculés, temps, performance en hash/s
+Gérer les erreurs correctement
+
+
+##Prompt pour benchmark_rust_multicoeur
+
+Importation de benchmark_rust
+
+- Crée un programme en rust de fonctionnement identique que benchmark_rust mais en utilisant le multicoeur avec la librairie Rayon
