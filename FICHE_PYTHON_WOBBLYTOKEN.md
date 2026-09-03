@@ -14,9 +14,11 @@ Cette fiche vise un élève de 2e année de gymnase qui connaît déjà :
 
 
 
-WobblyToken ajoute plusieurs notions qui ne sont pas toujours maîtrisées à ce niveau : dictionnaires imbriqués, ensembles (`set`), tuples, exceptions, modules, API Flask et cryptographie appliquée.
+WobblyToken ajoute plusieurs notions qui ne sont pas toujours maîtrisées à ce niveau : set, tuples, exceptions, API Flask et cryptographie.
+Cependant a été évité la programmation orienté objet et fonctionnelle les opérations bit à bit ainsi que l'utilisation de liste/dictionnaire en compréhension.
+Elles m'auraient sauvé du temps et des lignes de codes mais comme mentionné plus tôt le but n'est pas de faire une démonstration technique mais de faire un code lisible et compréhensible par le plus de personne possible
 
-L'objectif est de comprendre le projet et comment il a été écrit
+L'objectif maintenant est de comprendre le projet et comment il a été écrit
 
 ## 2. Comment lire le projet
 
