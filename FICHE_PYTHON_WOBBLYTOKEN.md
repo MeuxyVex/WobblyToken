@@ -1,4 +1,6 @@
 # Fiche Python pour lire WobblyToken
+## 0
+Ce programme est à but éducatif il n'a pas pour but de prendre le role d'une vraie cryptomonnaie. Il est donc naturel que le code soit volontairement moins optimiser pour prioriser la lisibilité.
 
 ## 1. Niveau de départ et objectif
 
