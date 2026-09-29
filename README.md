@@ -25,7 +25,7 @@
 
 ## État actuel
 
-Mini-blockchain avec 2 nœuds qui communiquent, minent et mettent à jour une blockchain.
+Cryptomonnaie prototype avec plusieurs noeuds et un système de minage et de transaction complet.
 
 ## Fonctionnalités
 
