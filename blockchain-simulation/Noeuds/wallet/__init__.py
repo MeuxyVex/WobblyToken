@@ -1,3 +1,3 @@
-from .address import generation_addresse, adress_validation
-from .keys import generate_keys
-from .storage import walletcreation
+from .address import generer_adresse, valider_adresse
+from .keys import generer_cles
+from .storage import charger_ou_creer_portefeuille

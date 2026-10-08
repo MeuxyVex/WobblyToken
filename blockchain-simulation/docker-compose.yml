@@ -1,10 +1,12 @@
 
+
 services: #annonce la liste des conteneurs que docker compose doit créer
   registry: #le conteneur qui va fair office de registre pour les nodes
     build: ./Database #indique le chemin du Dockerfile pour construire l'image du conteneur
     ports:
       - "6001:6000"
     volumes:
+
       - registry-data:/app/data #permet de stocker les données du registre même si il est arrêté ou supprimé dans un dossier data
     restart: unless-stopped #donne l'indcation a docker de le rédémarrer si il s'arrête sauf si il est stoppé par l'utilisateur
 
@@ -13,7 +15,10 @@ services: #annonce la liste des conteneurs que docker compose doit créer
     ports:
       - "5001:5000" #ports ou il sera accessible depuis l'extérieur du conteneur
     volumes:
-    - node1-wallet:/app/wallet
+
+      #on garde le wallet dans le volume, le code reste dans /app/noeud
+      - node1-wallet:/app/wallet
+
     depends_on: #annonce que node1 dépend du registery pour s'enregistrer dans la db donc docker démarrera registery avant node1
       - registry
     environment:
@@ -36,16 +41,16 @@ services: #annonce la liste des conteneurs que docker compose doit créer
 
   node3:
     build: ./Noeuds
-    ports:  
+    ports:
       - "5003:5000"
     volumes:
       - node3-wallet:/app/wallet
-    depends_on: 
+    depends_on:
       - registry
-    environment:  
+    environment:
       - NODE_NAME=node3
       - REGISTRY_URL=http://registry:6000
-      - WALLET_PATH=/app/wallet/wallet.json 
+      - WALLET_PATH=/app/wallet/wallet.json
 
 volumes:
   registry-data:

@@ -1,6 +1,8 @@
 FROM python:3.11
 
-WORKDIR /app
+#on garde le code hors du volume du wallet
+#sinon les anciens fichiers python du volume peuvent être chargés à sa place
+WORKDIR /app/noeud
 
 COPY requirements.txt .
 

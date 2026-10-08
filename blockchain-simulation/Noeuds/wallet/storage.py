@@ -1,32 +1,41 @@
+#chargement et sauvegarde du portefeuille local du noeud.
+
 import json
-import os
+import os #bibliothèque pour la gestion des fichier et des chemins
 
-from .address import generation_addresse
-from .keys import generate_keys
+from .address import generer_adresse
+from .keys import generer_cles
 
 
-def walletcreation(path):
-    if os.path.exists(path):
-        with open(path, "r") as fichier:
+def charger_ou_creer_portefeuille(chemin):
+    #charge le wallet existant sinon crée les clés et sauvegarde le fichier
+    #retourne un dict avec les clés et l'adresse du wallet
+    
+
+    if os.path.exists(chemin): #charge le fichier si éxiste, utile si le noeud est redémarré
+        with open(chemin, "r") as fichier:
             return json.load(fichier)
 
-    directory = os.path.dirname(path)
+    dossier = os.path.dirname(chemin)
 
-    if directory:
-        os.makedirs(directory, exist_ok=True)
+    if dossier: #crée le dossier si il n'existe pas, souvent si le noeud est lancé pour la première fois
+        os.makedirs(dossier, exist_ok=True)
 
-    keys = generate_keys()
-    address = generation_addresse(keys["public_key"])
+    cles = generer_cles()
 
-    wallet = {
-        "private_key": keys["private_key"],
-        "public_key": keys["public_key"],
-        "address": address
+    adresse = generer_adresse(cles["public_key"])
+
+    portefeuille = {
+        "private_key": cles["private_key"],
+        "public_key": cles["public_key"],
+        "address": adresse
     }
 
-    with open(path, "w", encoding="utf-8") as fichier:
-        json.dump(wallet, fichier, indent=2)
+    with open(chemin, "w", encoding="utf-8") as fichier:
+        json.dump(portefeuille, fichier, indent=2)
 
-    os.chmod(path, 0o600)
-
-    return wallet
+    # le fichier contient la clé privée : seul son propriétaire peut le lire et l'écrire.
+    os.chmod(chemin, 0o600) #le chiffre est en octal et il permet de dire avec le chiffre 6 (4 + 2) que le propriétaire peut écrire et lire le fichier
+    #et avec les deux autres zéros que les autres ne peuvent rien faire (ils ne pourront pas la lire ni l'écrire)
+    #plus d'info : https://fr.wikipedia.org/wiki/Chmod
+    return portefeuille

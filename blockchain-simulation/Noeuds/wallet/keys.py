@@ -1,12 +1,17 @@
+#création des clée
+
 import ecdsa
 
 
-def generate_keys():
-    private_key = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1)
-    public_key = private_key.get_verifying_key()
+def generer_cles():
+    #création de la paire de clés, retourne un dict avec les deux clés en hexa
+    cle_privee = ecdsa.SigningKey.generate(curve=ecdsa.SECP256k1) #utilise courbe SECP256k1 avec ecdsa pour les clés
+
+    cle_publique = cle_privee.get_verifying_key()
 
     return {
-        "private_key": private_key.to_string().hex(),
-        "public_key": public_key.to_string().hex()
+        "private_key": cle_privee.to_string().hex(),
+        "public_key": cle_publique.to_string().hex() #retourne les clé en format héxadécimal
     }
 
+#retourne les clés en format héxadécimal 
